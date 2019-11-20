@@ -10,15 +10,21 @@
 **UFO Database:
     UFOS Table Columns:
         {
-            userID,
+            id, (primary key)
+            userID,(foreign)
             title,
             description,
             category,
-            image,
-            ???
+            image refernce, (Bells Stage 1)
+            coordinates-lat,
+            coordinates-lan,
+            points,
         }
     Users Table:
         {
-            email,
-            password
+            userID, (primary key)
+            userName,
+            profile picture, (Bells Stage 1)
+            email, (Bells Stage 1)
+            password,
         }

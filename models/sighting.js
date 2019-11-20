@@ -23,6 +23,15 @@ module.exports = function(sequelize, DataTypes) {
           validate:{
               len: [1]
           }
+      },
+      coordinatesLat:{
+        type: DataTypes.FLOAT
+      },
+      coordinatesLng:{
+        type: DataTypes.FLOAT
+      },
+      points:{
+        type: DataTypes.INTEGER
       }
     });
     return ufo;

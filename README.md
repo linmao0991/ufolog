@@ -18,13 +18,15 @@
             image refernce, (Bells Stage 1)
             coordinates-lat,
             coordinates-lan,
-            points,
+            likes,
+            dislikes
         }
     Users Table:
         {
             userID, (primary key)
             userName,
-            profile picture, (Bells Stage 1)
+            profileurl, (Bells Stage 1)
             email, (Bells Stage 1)
-            password,
+            aboutMe,
+            userPassword,
         }

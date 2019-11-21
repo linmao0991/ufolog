@@ -35,21 +35,44 @@ module.exports = function(app) {
     });
 
     // Post route for like/dislike updating for log.
-    app.post("/api/sighting/log/:rating", function(req, res) {
-      var rating = {
-        
+    app.post("/api/sighting/log/rating/:id", function(req, res) {
+      if (req.body.rating === "like"){
+        db.ufo.update(
+          {
+            like : req.body.points
+          },
+          {
+            where: {
+              id: req.params.id
+            }
+          },
+          ).then(function(dbufo) {
+          res.json(dbufo);
+        });
+      }else{
+        db.ufo.update(
+          {
+            dislike : req.body.points
+          },
+          {
+            where: {
+              id: req.params.id
+            }
+          },
+          ).then(function(dbufo) {
+          res.json(dbufo);
+        });
+      }
+    });
+
+    // Post route for deleting log
+    app.delete("/apy/sighting/log/delete/:id", function (req, res) {
+      db.ufo.destroy({
+        where: {
+          id: req.params.id
         }
-      db.ufo.update(
-        {
-          rating : 
-        },
-        {
-          where: {
-            id: 
-          }
-        },
-        ).then(function(dbAuthor) {
-        res.json(dbAuthor);
+      }).then(function(dbufo){
+        res.json(dbufo);
       });
     });
 };

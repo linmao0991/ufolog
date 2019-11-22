@@ -34,6 +34,16 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER
       }
     });
+
+    ufo.associate = function (models) {
+      models.ufo.belongsTo(models.User, {
+        onDelete: "CASCADE",
+        foreignKey: {
+          allowNull: false
+        }
+      });
+    };
+
     return ufo;
   };
   

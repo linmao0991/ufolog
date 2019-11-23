@@ -13,19 +13,29 @@ var passport = require("../config/passport");
 // =============================================================
 module.exports = function(app) {
 
-    // GET route for getting all of the ufo sightings
-    app.get("/api/ufo/", function(req, res) {
-      db.ufo.findAll({})
-        .then(function(dbufo) {
-          res.json(dbufo);
-        });
+ // GET route for getting all of the ufo sightings
+ app.get("/api/ufo/sightings", function(req, res) {
+  db.ufo.findAll({})
+    .then(function(dbufo) {
+      res.json(dbufo);
     });
+});
+// GET route for getting all logs by user ID
+app.get("api/ufo/sightings/:id", function(req, res) {
+  db.ufo.findAll({
+    where: {
+      id: req.params.id
+    }
+  }).then(function(dbufo) {
+    res.json(dbufo);
+  });
+});
 
+  // ***************************
+  // Account Get/Post Routes
+  // ***************************
 
-
-
-    // Account Get/Post Routes
-    // Using the passport.authenticate middleware with our local strategy.
+  // Using the passport.authenticate middleware with our local strategy.
   // If the user has valid login credentials, send them to the members page.
   // Otherwise the user will be sent an error
   app.post("/api/login", passport.authenticate("local"), function(req, res) {

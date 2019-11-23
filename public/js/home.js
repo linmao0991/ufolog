@@ -15,14 +15,14 @@ $(document).ready(function () {
     $.get("/api/user_data", function(data){
         // console.log(data);
     }).then(function(data){
-        // If logged out, hide signout & profile buttons
+        // If logged out, display login & signup buttons
         if(data.userName == null){
             $("#login").css("display", "inherit");
             $("#signup").css("display", "inherit");
             $("#signout").css("display", "none");
             $("#profile").css("display", "none");
         }
-        // If l
+        // If logged in, display signout & profile buttons
         else{
             $("#login").css("display", "none");
             $("#signup").css("display", "none");

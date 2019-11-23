@@ -35,10 +35,10 @@
                     <a class="nav-link" id="signup" href="#">Sign Up</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="signout" href="/logout">Sign Out</a>
+                    <a class="nav-link" style="display: none" id="signout" href="/logout">Sign Out</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="profile" href="/profile">Profile</a>
+                    <a class="nav-link" style="display: none" id="profile" href="/profile">Profile</a>
                 </li>
             </ul>
         </div>
@@ -60,12 +60,16 @@
                         <input type="text" class="form-control" id="signup-username-input" placeholder="Username">
                     </div>
                     <div class="form-group">
+                        <label for="profileurl">Profile Image URL</label>
+                        <input type="text" class="form-control" id="signup-profileurl-input" placeholder="https://www...">
+                    </div>
+                    <div class="form-group">
+                        <label for="aboutMe">Profile Description</label>
+                        <input type="text" class="form-control" id="signup-aboutMe-input" placeholder="I'm a professional UFO hunter and ...">
+                    </div>
+                    <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="signup-password-input" placeholder="Password">
-                    </div>
-                    <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="signup-rememberMe">
-                        <label class="form-check-label" for="rememberMe">Remember Me</label>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
@@ -94,10 +98,6 @@
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="login-password-input" placeholder="Password">
-                    </div>
-                    <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="login-rememberMe">
-                        <label class="form-check-label" for="rememberMe">Remember Me</label>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>

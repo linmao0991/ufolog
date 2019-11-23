@@ -23,7 +23,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     aboutMe: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     // The password cannot be null

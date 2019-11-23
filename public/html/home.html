@@ -1,1 +1,213 @@
-<!-- Home Page -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>UFO</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Icon Library -->
+    <script src="https://kit.fontawesome.com/cedf338da3.js" crossorigin="anonymous"></script>
+
+    <!-- Customized CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a class="navbar-brand" id="logo" href="/"><img src="../imgs/abduction.webp" id="abduction_image"
+                alt="UFO Abducting a cow">They Are Among Us</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" id="login" href="#">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="signup" href="#">Sign Up</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="display: none;" id="signout" href="#">Sign Out</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="profile" href="#">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="log_sighting" href="#">Log Sighting</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--  Main Body for Logs and Posts -->
+    <div class="container mt-2">
+        <!-- Log row -->
+        <div class="row">
+            <!-- Log Cards Template **USE JS TO POPLAUTE FROM DATABASE**-->
+            <div class="col" id="log_display">
+
+                <div class="card m-2">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4">
+                            <img src="..." class="card-img" alt="...">
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="card-header border rounded">
+                                <h5>Log Title</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Log Description</p>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn likebutton" data-logid="1"><i class="far fa-thumbs-up"></i>10</i></button><button class="btn dislike button" data-logid="1"><i class="far fa-thumbs-down"></i>1</i></button>
+                                <p class="float-right">Posted:<span>11-22-2019</span>  By: <span>Username</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card m-2">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4">
+                            <img src="..." class="card-img" alt="...">
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="card-header border rounded">
+                                <h5>Log Title</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Log Description</p>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn"><i class="far fa-thumbs-up"></i>10</i></button><button class="btn"><i class="far fa-thumbs-down"></i>1</i></button>
+                                <p class="float-right">Posted:<span>11-22-2019</span>  By: <span>Username</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="results-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+                    <h2 class="modal-title"><strong>Sign Up</strong></h2>
+                </div>
+                <form class="signup">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username-input" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password-input" placeholder="Password">
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember Me</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Sighting Modal -->
+    <div id="logging_modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+                    <h2 class="modal-title"><strong>Log My Sighting</strong></h2>
+                </div>
+                <form class="sightinglog">
+                    <div class="form-group">
+                        <label for="sighting_title">Log Title</label>
+                        <input type="text" class="form-control" id="log_title" placeholder="Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="sighting_description">Sighting Description</label>
+                        <textarea class="form-control" id="log_description" placeholder="Describe your sighting here!"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sighting_image">Image URL</label>
+                        <textarea rows="1" col="50" class="form-control" id="log_image" placeholder="Enter a url link to your image."></textarea>
+                    </div>
+                    <div>
+                        <p>Latitude: <span id="mylat"></span> Longitude: <span id="mylng"></span></p>
+                        <button class="btn btn-warning" id="getlocation" type="button">Get Coordinates</button>
+                        <button class="btn btn-warning" id="manualLocation" type="button">Manual Coordinates</button>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-primary float-right">Submit</button>
+                    <button type="button" class="btn btn-default float-left" data-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Coordinate Input -->
+    <div id="coordinate_modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+                    <h2 class="modal-title"><strong>Manual Coordinate Input</strong></h2>
+                </div>
+                <form class="coordinate">
+                    <div class="form-group">
+                        <label for="sighting_title">Latitude</label>
+                        <input type="float" class="form-control" id="manual_lat" placeholder="Latitude" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sighting_title">Longitude</label>
+                        <input type="float" class="form-control" id="manual_lng" placeholder="Longitude" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary float-right">Submit</button>
+                    <button type="button" class="btn btn-default text-white float-left" data-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="../js/home.js"></script>
+    <script type="text/javascript" src="../js/signup.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>

@@ -1,1 +1,10 @@
-/* Customized CSS */
+#abduction_image{
+    display: block;
+    width: 10%;
+}
+.modal-content {
+    padding: 20px;
+}
+/* #logo{
+
+} */

@@ -1,11 +1,31 @@
 $(document).ready(function () {
 
+    var loggedin = false;
+    var user_Name = "";
     getAllLogs();
-    // Logging In
+    userInfo();
+      // Display user info
+    function userInfo() {
+        $.get("/api/user_data", function(data) {
+        }).then(function(data) {
+            if( typeof data.userName !== "undefined"){
+                loggedin = true;
+                user_Name = data.userName;
+                console.log(user_Name);
+                console.log(loggedin);
+            }
+        });
+    };
+    // Signing Up
     $("#signup").on("click", function (event) {
         event.preventDefault();
-        $("#results-modal").modal("toggle");
-        $("#signout").css("display", "inherit")
+        $("#results-modal-signup").modal("toggle");
+    });
+
+    //Logging In
+    $("#login").on("click", function (event) {
+        event.preventDefault();
+        $("#results-modal-login").modal("toggle");
     });
 
     // Log Sighting Button
@@ -30,14 +50,16 @@ $(document).ready(function () {
         $("#coordinate_modal").modal("toggle");
     })
 
-    // Sighting log form submission **Not Finished need account log in to retrive userName and userID association.
+    // Sighting log form submission
     $("form.sightinglog").on("submit", function(event){
+        event.preventDefault();
         var logData = {};
         $.get("/api/user_data", function(err, res){
-            
+            console.log(res);
         }).then(function(data){
+            console.log("Creating log object")
             //Creating log data object
-            logData.userName = //Need account log in to finish this portion
+            logData.userName = data.userName;
             logData.title = $("#log_title").val().trim();
             logData.description = $("#log_description").val();
             logData.category = "UFO";
@@ -56,6 +78,7 @@ $(document).ready(function () {
             logData.coordinatesLng =  parseFloat($("#mylng").text());
             logData.likes = 0;
             logData.dislikes = 0;
+            logData.UserId = data.id;
             console.log(logData);
             //Post new sighting log with logData object
             submitLog(logData);
@@ -66,7 +89,10 @@ $(document).ready(function () {
     });
 
     //Get coordinates button
+    //**Add a loading animation while getting coordinates
     $("#getlocation").on("click", function(event){
+        $("#mylat").text("");
+        $("#mylng").text("");
         event.preventDefault();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position){
@@ -82,8 +108,11 @@ $(document).ready(function () {
 
     //Submit new log function
     function submitLog(logData){
+        console.log("submtting");
         $.post("/api/sighting/log", logData, function() {
             alert("Sighting Logged");
+        }).then(function(res){
+            createLogCard(res);
         });
     }
 
@@ -96,41 +125,81 @@ $(document).ready(function () {
         });
     }
 
-    //Dislike button function    
-    $(".likebutton").on("click", function(){
-        var logID = $(this).attr("data-logid").val();
-        var ratingData = {
-            rating: "like"
-        }
-        $.ajax({
-            method: "PUT",
-            url: "/api/sighting/log/rating/"+logID,
-            data: ratingData
-        }).then(function(res){
-            //Maybe Reload Page?
-            $.get("api/ufo/sightings/"+logID, function(data){
-                $(this).children(".fa-thumbs-up").text(data.likes);
+    //Like button function
+    $(document).on("click","button.likebutton",function(){
+        if (!loggedin){
+            alert("Please log in to rate log");
+        }else{
+            $(this).prop('disabled', true);
+            var button = this;
+            var logID = $(button).attr("data-logid")
+            var ratingData = {
+                userName: user_Name,
+                id: $(button).attr("data-logid"),
+                rating: "like"
+            }
+            updateRating(ratingData).then(function(success){
+                console.log(success);  
+                if( success.code !== "Denied"){
+                    $.get("/api/ufo/sightings/get_rating/"+logID,function(data){
+
+                    }).then(function(response){
+                        console.log(response)
+                        $("#likelog"+logID).text(response.likes);
+                    });
+                    $(button).prop('disabled', false);
+                }else{
+                    alert(success.code+" : "+success.reason);
+                }
             });
-        });
+        }
     });
 
-    //Like button function
-    $(".dislikebutton").on("click", function(){
-        var logID = $(this).attr("data-logid").val();
-        var ratingData = {
-            rating: "dislike"
+    //DisLike button function
+    $(document).on("click","button.dislikebutton",function(){
+        if (!loggedin){
+            alert("Please log in to rate log");
+        }else{
+            $(this).prop('disabled', true);
+            var button = this;
+            var ratingData = {
+                userName: user_Name,
+                id: $(button).attr("data-logid"),
+                rating: "dislike"
+            }
+            updateRating(ratingData).then(function(success){
+                console.log(success);
+                var data = success[0];
+                var logDislikes = function (){
+                    for ( var i = 0; i < data.log_ratings.length; i++){
+                        var count = 0;
+                        if (data.log_ratings[i].rating === "dislike"){
+                            count++
+                        }
+                    }
+                    return count;
+                }
+                $("#dislikelog"+data.id).text(logDislikes);
+                $(button).prop('disabled', false);
+            });
         }
-        $.ajax({
-            method: "PUT",
-            url: "/api/sighting/log/rating/"+logID,
-            data: ratingData
-        }).then(function(res){
-            //Maybe Reload Page?
-            $.get("api/ufo/sightings/"+logID, function(data){
-                $(this).children(".fa-thumbs-down").text(data.likes);
+    });
+
+    // Promise function to update rating and return ratings value
+    function updateRating(data){
+        var ratingData = data;
+        return new Promise(function(reslove, reject){
+            $.post("/api/sighting/log/rating/"+ratingData.id, ratingData, function(res){
+            }).then(function(data){
+                // $.get("/api/ufo/sightings/"+ratingData.id, function(data){
+                // }).then(function(res){
+                //     //console.log(res);
+                //     return reslove(res);
+                // });
+                return reslove(data);
             });
         });
-    });
+    }
 
     //Log Card creation function
     function createLogCard(Data){
@@ -147,25 +216,45 @@ $(document).ready(function () {
         var mainDiv = $("<div>").addClass("col-lg-8");
             var headerDiv = $("<div>").addClass("card-header border rounded").html("<h5>"+Data.title+"</h5");
             var bodyDiv = $("<div>").addClass("card-body").html("<p>"+Data.description+"</p>");
-            var divFooter = $("<div>").addClass("card-footer")
+            var divFooter = $("<div>").addClass("card-footer").attr("id","ufolog"+Data.id);
                 //Like Button
-                var likeButton = $("<button>").addClass("btn likebutton").attr("data-logid",Data.id)
-                likeButton.html("<i class='far fa-thumbs-up'></i>"+Data.likes+"</i>");
+                var likeButton = $("<button>").addClass("btn likebutton").attr("data-logid",Data.id);
+                likeButton.append("<i class='far fa-thumbs-up'></i>");
                 //Dislike Button
-                var dislikeButton = $("<button>").addClass("btn dislikebutton").attr("data-logid",Data.id)
-                dislikeButton.html("<i class='far fa-thumbs-down'></i>"+Data.dislikes+"</i>");
+                var dislikeButton = $("<button>").addClass("btn dislikebutton").attr("data-logid",Data.id);
+                dislikeButton.append("<i class='far fa-thumbs-down'></i>");
                 //Log Data
-                var footerData = $("<p>").addClass("float-right").html("Posted:<span>"+Data.createdAt+"</span>  By: <span>"+userName+"</span>")
+                var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D ,YYYY h:mm A")+"</span>-<span>"+Data.userName+"</span>")
             //Append to footer
-            divFooter.append(likeButton, dislikeButton, footerData);
+            divFooter.append(likeButton, "<span id='likelog"+Data.id+"'>"+Data.likes+"</span>", dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.dislikes+"</span>", footerData);
             //Append all content to mainDiv
-            mainDiv.append(headerDiv, bodyDiv, divFooter)
-
+            mainDiv.append(headerDiv, bodyDiv, divFooter);
         //Append to row with no gutters
         rowDiv.append(imgDiv, mainDiv);
         //Append to card Div
         cardDiv.append(rowDiv);
         //Append to html page
-        $("#log_display").apped(cardDiv);
+        $("#log_display").append(cardDiv);
     };
+
+    $.get("/api/user_data", function(data){
+        // console.log(data);
+    }).then(function(data){
+        // If logged out, display login & signup buttons
+        if(data.userName == null){
+            $("#login").css("display", "inherit");
+            $("#signup").css("display", "inherit");
+            $("#signout").css("display", "none");
+            $("#profile").css("display", "none");
+            $("#log_sighting").css("display", "none");
+        }
+        // If logged in, display signout & profile buttons
+        else{
+            $("#login").css("display", "none");
+            $("#signup").css("display", "none");
+            $("#signout").css("display", "inherit");
+            $("#profile").css("display", "inherit");
+            $("#log_sighting").css("display", "inherit");
+        }
+    });
 });

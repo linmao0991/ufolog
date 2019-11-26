@@ -14,20 +14,69 @@ var passport = require("../config/passport");
 module.exports = function (app) {
   // GET route for getting all of the ufo sightings
   app.get("/api/ufo/sightings", function (req, res) {
-    db.ufo.findAll({})
+    db.ufo.findAll({
+    //   include: [{
+    //     model: db.log_rating,
+    //     as: 'likes',
+    //     attributes : [
+    //       'likes',
+    //       [db.sequelize.fn("COUNT", db.sequelize.col("rating")),"likes"]
+    //     ]
+    //   },{
+    //     model: db.log_rating,
+    //     as: 'dislikes',
+    //     attributes : [
+    //       'likes',
+    //       [db.sequelize.fn("COUNT", db.sequelize.col("rating")),"dislikes"]
+    //     ]
+    //   }
+    // ]
+    })
       .then(function (dbufo) {
+        console.log(dbufo);
         res.json(dbufo);
       });
   });
 
-  // GET route for getting all logs by user ID
-  app.get("api/ufo/sightings/:id", function (req, res) {
+  // GET route for getting all logs ID
+  app.get("/api/ufo/sightings/:id", function (req, res) {
     db.ufo.findAll({
       where: {
         id: req.params.id
-      }
+      },
+      include: [db.log_rating]
     }).then(function (dbufo) {
+      console.log(dbufo)
       res.json(dbufo);
+    });
+  });
+
+  app.get("/api/ufo/sightings/get_rating/:id", function( req, res){
+    console.log("*****************************");
+    console.log("get_rating data");
+    console.log(req.body);
+    var rating = {}
+    db.log_rating.count({
+      where: {
+        ufoId: req.params.id,
+        rating: "like"
+      }
+    }).then(function(result){
+      rating.likes = result;
+      console.log(result);
+      console.log("*****************************");
+      db.log_rating.count({
+        where: {
+          ufoId: req.params.id,
+          rating: "dislike"
+        }
+      }).then(function(result){
+        rating.dislikes = result;
+        console.log(result);
+        console.log("*****************************");
+        console.log(rating);
+        res.json(rating);
+      });
     });
   });
 
@@ -35,35 +84,35 @@ module.exports = function (app) {
   // Using the passport.authenticate middleware with our local strategy.
   // If the user has valid login credentials, send them to the members page.
   // Otherwise the user will be sent an error
-  app.post("/api/login", passport.authenticate("local"), function (req, res) {
+  app.post("/api/login", passport.authenticate("local"), function(req, res) {
     res.json(req.user);
   });
 
   // Route for signing up a user. The user's password is automatically hashed and stored securely thanks to
   // how we configured our Sequelize User Model. If the user is created successfully, proceed to log the user in,
   // otherwise send back an error
-  app.post("/api/signup", function (req, res) {
+  app.post("/api/signup", function(req, res) {
     db.User.create({
-        userName: req.body.userName,
-        password: req.body.password
-      })
-      .then(function () {
+      userName: req.body.userName,
+      password: req.body.password
+    })
+      .then(function() {
         res.redirect(307, "/api/login");
       })
-      .catch(function (err) {
+      .catch(function(err) {
         console.log(db.User);
         res.status(401).json(err);
       });
   });
 
   // Route for logging user out
-  app.get("/logout", function (req, res) {
+  app.get("/logout", function(req, res) {
     req.logout();
     res.redirect("/");
   });
 
   // Route for getting some data about our user to be used client side
-  app.get("/api/user_data", function (req, res) {
+  app.get("/api/user_data", function(req, res) {
     if (!req.user) {
       // The user is not logged in, send back an empty object
       res.json({});
@@ -78,28 +127,80 @@ module.exports = function (app) {
   });
 
   // Post route for like/dislike updating for log.
-  app.put("/api/sighting/log/rating/:id", function (req, res) {
-    if (req.body.rating === "like") {
-      db.ufo.update({
-        like: sequelize.literal('like + 1')
-      }, {
-        where: {
-          id: req.params.id
+  // app.put("/api/sighting/log/rating/:id", function (req, res) {
+  //   if (req.body.rating === "like") {
+  //     db.ufo.findOne({
+  //       where: {
+  //         id: req.params.id
+  //       }
+  //     },).then(function (dbufo) {
+  //       dbufo.increment("likes");
+  //       res.json(dbufo);
+  //     });
+  //   } else {
+  //     db.ufo.findOne({
+  //       where: {
+  //         id: req.params.id
+  //       }
+  //     }, ).then(function (dbufo) {
+  //       dbufo.increment("dislikes");
+  //       res.json(dbufo);
+  //     });
+  //   }
+  // });
+
+  app.post("/api/sighting/log/rating/:id", function (req, res) {
+    db.log_rating.findOne({
+      where: {
+        ufoId: req.params.id,
+        userName: req.body.userName
+      }
+    }).then(function(data){
+      console.log("=============")
+      console.log("Data")
+      console.log(data);
+      console.log("=============")
+      if (data === null){
+        console.log("=============")
+        console.log("No Rating");
+        console.log("=============")
+        if (req.body.rating === "like") {
+          console.log("=============")
+          console.log("like")
+          console.log("=============")
+          db.log_rating.create({
+              userName: req.body.userName,
+              rating: req.body.rating,
+              ufoId: req.params.id
+          }).then(function (dblogratings) {
+            //dblogratings.increment("likes");
+            return res.json(dblogratings);
+          });
+        } else {
+          console.log("=============")
+          console.log("dislike")
+          console.log("=============")
+          db.log_rating.create({
+            userName: req.body.userName,
+            rating: req.body.rating,
+            ufoId: req.params.id
+          }).then(function (dblogratings) {
+            //dblogratings.increment("dislikes");
+            return res.json(dblogratings);
+          });
         }
-      }, ).then(function (dbufo) {
-        res.json(dbufo);
-      });
-    } else {
-      db.ufo.update({
-        dislike: sequelize.literal('dislike + 1')
-      }, {
-        where: {
-          id: req.params.id
-        }
-      }, ).then(function (dbufo) {
-        res.json(dbufo);
-      });
-    }
+      }else{
+        var code = {
+          code: "Denied",
+          reason: "Already rated log"
+          }
+        console.log("=============")
+        console.log("Denied");
+        console.log(code);
+        console.log("=============")
+        return res.json(code);
+      }
+    })
   });
 
   // Post route for loging a new sighting

@@ -28,7 +28,8 @@ module.exports = function(sequelize, DataTypes) {
       image:{
           type: DataTypes.STRING,
           validate:{
-              len: [1]
+              len: [1],
+              isUrl: true,
           }
       },
       coordinatesLat:{
@@ -54,6 +55,11 @@ module.exports = function(sequelize, DataTypes) {
       });
     };
 
+    ufo.associate = function(models) {
+      ufo.hasMany(models.log_rating, {
+        onDelete: "cascade"
+      });
+    };
     return ufo;
   };
   

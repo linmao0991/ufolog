@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,25 +8,86 @@
     <title>Profile</title>
 
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <!-- Customized CSS -->
     <link rel="stylesheet" href="../css/styles.css">
-
+    <link href="https://fonts.googleapis.com/css?family=Special+Elite&display=swap" rel="stylesheet">
 </head>
-<body>
-    
+
+<body class="profile-body">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a class="navbar-brand" id="logo" href="/"><img src="../imgs/abduction.webp" id="abduction_image"
+                alt="UFO Abducting a cow">They Are Among Us</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" id="signout" href="/logout">Sign Out</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="home" href="/">Home</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <br>
+
+    < <!-- Profile Page layout -->
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-lg-4 profile-card">
+                <div class="card" style="width:400px">
+                    <img class="card-img-top profile-image"
+                        src="https://ichef.bbci.co.uk/news/660/media/images/75473000/jpg/_75473457_forbidden-planet.jpg"
+                        alt="Card image">
+                    <div class="card-body">
+                        <h4 class="card-title profile-name"></h4>
+                        <p class="card-text profile-description">I reckon I've spotted atleast a hundred UFOs in my
+                            time, been abducted twice too</p>
+                        <!-- <a href="#" class="btn btn-primary">See Profile</a> -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 ufo_posts">
+                <p>UFO Posts here</p>
+            </div>
+        </div>
 
 
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-    <!-- JavaScript -->
-    <script type="text/javascript" src="../js/home.js"></script>
-    <script type="text/javascript" src="../js/signup.js"></script>
+        <!-- Footer -->
+        <footer class="page-footer font-small blue">
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+            <!-- Copyright -->
+            <div class="footer-copyright text-center py-3">&copy; 2019 Copyright:
+                <a href="#"> ufolog.com</a>
+            </div>
+            <!-- Copyright -->
+
+        </footer>
+        <!-- Footer -->
+
+
+        <!-- jQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        <!-- JavaScript -->
+        <script type="text/javascript" src="../js/profile.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+        </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+        </script>
 </body>
+
 </html>

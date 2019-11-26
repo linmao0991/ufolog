@@ -1,3 +1,8 @@
+.profile-body {
+    font-family: 'Special Elite', cursive;
+    background-color: black;
+    color: green;
+}
 #abduction_image{
     display: block;
     width: 10%;
@@ -5,6 +10,37 @@
 .modal-content {
     padding: 20px;
 }
-/* #logo{
-
-} */
+.ufo_posts {
+    background-color: rgb(46, 46, 46);
+    
+}
+.card {
+    color: black;
+    border-color: green;
+    /* margin: auto; */
+}
+.border {
+    border-color: green;
+}
+a {
+    color: green;
+}
+.logCard {
+    color: rgb(158, 0, 158);
+    background-color: rgb(31, 31, 31);
+}
+.logBody {
+    color: white;
+}
+.rateBtn {
+    color: rgb(0, 162, 255);
+}
+.user {
+    color: green;
+}
+i {
+    color: green;
+}
+.modal-content {
+    background-color: black;
+}

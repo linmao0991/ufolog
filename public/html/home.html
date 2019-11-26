@@ -11,12 +11,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+    <!-- Icon Library -->
+    <script src="https://kit.fontawesome.com/cedf338da3.js" crossorigin="anonymous"></script>
+
     <!-- Customized CSS -->
     <link rel="stylesheet" href="../css/styles.css">
-
+    <link href="https://fonts.googleapis.com/css?family=Special+Elite&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body class="profile-body">
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -35,14 +38,26 @@
                     <a class="nav-link" id="signup" href="#">Sign Up</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" style="display: none" id="signout" href="/logout">Sign Out</a>
+                    <a class="nav-link" style="display: none;" id="signout" href="/logout">Sign Out</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" style="display: none" id="profile" href="/profile">Profile</a>
+                    <a class="nav-link" id="profile" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="log_sighting" href="#">Log Sighting</a>
                 </li>
             </ul>
         </div>
     </nav>
+
+    <!--  Main Body for Logs and Posts -->
+    <div class="container mt-2">
+        <!-- Log row -->
+        <div class="row">
+            <!-- Log Cards Template **USE JS TO POPLAUTE FROM DATABASE**-->
+            <div class="col" id="log_display"></div>
+        </div>
+    </div>
 
     <!-- Signup Modal -->
     <div id="results-modal-signup" class="modal fade" role="dialog">
@@ -51,7 +66,6 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
                     <h2 class="modal-title"><strong>Sign Up</strong></h2>
                 </div>
                 <form class="signup">
@@ -60,8 +74,12 @@
                         <input type="text" class="form-control" id="signup-username-input" placeholder="Username">
                     </div>
                     <div class="form-group">
-                        <label for="profileurl">Profile Image URL</label>
+                        <!-- <p><input type="file"  accept="image/*" name="image" id="file" style="display: none;"></p>
+                        <p><label for="file" style="cursor: pointer;">Upload Image</label></p> -->
+                        <label id="file" for="profileurl">Profile Image URL</label>
                         <input type="text" class="form-control" id="signup-profileurl-input" placeholder="https://www...">
+                        <br>
+                        <p><img id="output" width="200" /></p>
                     </div>
                     <div class="form-group">
                         <label for="aboutMe">Profile Description</label>
@@ -71,10 +89,10 @@
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="signup-password-input" placeholder="Password">
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-secondary">Submit</button>
                 </form>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -99,14 +117,87 @@
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="login-password-input" placeholder="Password">
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-secondary">Submit</button>
                 </form>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Log Sighting Modal -->
+    <div id="logging_modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+                    <h2 class="modal-title"><strong>Log My Sighting</strong></h2>
+                </div>
+                <form class="sightinglog">
+                    <div class="form-group">
+                        <label for="sighting_title">Log Title</label>
+                        <input type="text" class="form-control" id="log_title" placeholder="Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="sighting_description">Sighting Description</label>
+                        <textarea class="form-control" id="log_description" placeholder="Describe your sighting here!"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sighting_image">Image URL</label>
+                        <textarea rows="1" col="50" class="form-control" id="log_image" placeholder="Enter a url link to your image."></textarea>
+                    </div>
+                    <div>
+                        <p>Latitude: <span id="mylat"></span> Longitude: <span id="mylng"></span></p>
+                        <button class="btn btn-light" id="getlocation" type="button">Get Coordinates</button>
+                        <button class="btn btn-light" id="manualLocation" type="button">Manual Coordinates</button>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-secondary float-right">Submit</button>
+                    <button type="button" class="btn btn-default float-left" data-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Coordinate Input -->
+    <div id="coordinate_modal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+
+            <!-- Modal content-->
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+                    <h2 class="modal-title"><strong>Manual Coordinate Input</strong></h2>
+                </div>
+                <form class="coordinate">
+                    <div class="form-group">
+                        <label for="sighting_title">Latitude</label>
+                        <input type="float" class="form-control" id="manual_lat" placeholder="Latitude" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sighting_title">Longitude</label>
+                        <input type="float" class="form-control" id="manual_lng" placeholder="Longitude" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary float-right">Submit</button>
+                    <button type="button" class="btn btn-default text-white float-left" data-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+<footer class="page-footer font-small blue">
+
+        <!-- Copyright -->
+        <div class="footer-copyright text-center py-3">&copy; 2019 Copyright:
+          <a href="#"> ufolog.com</a>
+        </div>
+        <!-- Copyright -->
+      
+      </footer>
+      <!-- Footer -->
 
     <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -115,7 +206,6 @@
     <script type="text/javascript" src="../js/home.js"></script>
     <script type="text/javascript" src="../js/signup.js"></script>
     <script type="text/javascript" src="../js/login.js"></script>
-
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">

@@ -15,22 +15,6 @@ module.exports = function (app) {
   // GET route for getting all of the ufo sightings
   app.get("/api/ufo/sightings", function (req, res) {
     db.ufo.findAll({
-    //   include: [{
-    //     model: db.log_rating,
-    //     as: 'likes',
-    //     attributes : [
-    //       'likes',
-    //       [db.sequelize.fn("COUNT", db.sequelize.col("rating")),"likes"]
-    //     ]
-    //   },{
-    //     model: db.log_rating,
-    //     as: 'dislikes',
-    //     attributes : [
-    //       'likes',
-    //       [db.sequelize.fn("COUNT", db.sequelize.col("rating")),"dislikes"]
-    //     ]
-    //   }
-    // ]
     })
       .then(function (dbufo) {
         console.log(dbufo);

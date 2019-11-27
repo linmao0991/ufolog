@@ -38,13 +38,13 @@
                     <a class="nav-link" id="signup" href="#">Sign Up</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" style="display: none" id="signout" href="/logout">Sign Out</a>
+                    <a class="nav-link" style="display: none;" id="signout" href="/logout">Sign Out</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" style="display: none" id="profile" href="/profile">Profile</a>
+                    <a class="nav-link" id="profile" href="/profile">Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" style="display: none" id="log_sighting" href="#">Log Sighting</a>
+                    <a class="nav-link" id="log_sighting" href="#">Log Sighting</a>
                 </li>
             </ul>
         </div>
@@ -74,7 +74,7 @@
                 <form class="signup">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" id="signup-username-input" placeholder="Username">
+                        <input type="text" class="form-control" id="signup-username-input" placeholder="Username" required="required">
                     </div>
                     <div class="form-group">
                         <label for="profileurl">Profile Image URL</label>
@@ -86,7 +86,7 @@
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="signup-password-input" placeholder="Password">
+                        <input type="password" class="form-control" id="signup-password-input" placeholder="Password" required="required">
                     </div>
                     <button type="submit" class="btn btn-secondary">Submit</button>
                 </form>
@@ -110,11 +110,11 @@
                 <form class="login">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" id="login-username-input" placeholder="Username">
+                        <input type="text" class="form-control" id="login-username-input" placeholder="Username" required="required">
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="login-password-input" placeholder="Password">
+                        <input type="password" class="form-control" id="login-password-input" placeholder="Password" required="required">
                     </div>
                     <button type="submit" class="btn btn-secondary">Submit</button>
                 </form>
@@ -138,18 +138,18 @@
                 <form class="sightinglog">
                     <div class="form-group">
                         <label for="sighting_title">Log Title</label>
-                        <input type="text" class="form-control" id="log_title" placeholder="Title">
+                        <input type="text" class="form-control" id="log_title" placeholder="Title" required="required">
                     </div>
                     <div class="form-group">
                         <label for="sighting_description">Sighting Description</label>
-                        <textarea class="form-control" id="log_description" placeholder="Describe your sighting here!"></textarea>
+                        <textarea class="form-control" id="log_description" placeholder="Describe your sighting here!" required="required"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="sighting_image">Image URL</label>
-                        <textarea rows="1" col="50" class="form-control" id="log_image" placeholder="Enter a url link to your image."></textarea>
+                        <textarea rows="1" col="50" class="form-control" id="log_image" placeholder="Enter a url link to your image." required="required"></textarea>
                     </div>
                     <div>
-                        <p>Latitude: <span id="mylat"></span> Longitude: <span id="mylng"></span></p>
+                        <p>Latitude: <span id="mylat" required="required"></span> Longitude: <span id="mylng" required="required"></span></p>
                         <button class="btn btn-light" id="getlocation" type="button">Get Coordinates</button>
                         <button class="btn btn-light" id="manualLocation" type="button">Manual Coordinates</button>
                     </div>

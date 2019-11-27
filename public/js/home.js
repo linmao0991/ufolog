@@ -4,11 +4,13 @@ $(document).ready(function () {
     var user_Name = "";
     getAllLogs();
     userInfo();
+
       // Display user info
     function userInfo() {
         $.get("/api/user_data", function(data) {
         }).then(function(data) {
-            if( typeof data.userName !== "undefined"){
+            //Sets user as logged in if true
+            if( typeof data.userName !== "undefined" || typeof data.userName !== null){
                 loggedin = true;
                 user_Name = data.userName;
                 console.log(user_Name);
@@ -55,36 +57,34 @@ $(document).ready(function () {
         event.preventDefault();
         var logData = {};
         $.get("/api/user_data", function(err, res){
-            console.log(res);
         }).then(function(data){
-            console.log("Creating log object")
+            console.log(data);
             //Creating log data object
+            logData.rating = { 
+                likes: 0, 
+                dislikes: 0
+            };
             logData.userName = data.userName;
             logData.title = $("#log_title").val().trim();
             logData.description = $("#log_description").val();
             logData.category = "UFO";
             logData.image = $("#log_image").val().trim();
-            if(isNaN(parseFloat($("#mylat").text()))  || isNaN(parseFloat($("#mylng").text())) ){
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position){
-                    logData.coordinatesLat = position.coords.latitude;
-                    logData.coordinatesLng = position.coords.longitude;
-                    });
-                }else{
-                    alert("Geolocation is not supported by this browser.");
-                }
-            };
+            logData.UserId = data.id;
+            console.log($("#mylat").text());
+            if( $("#mylat").text() === "" || $("#mylng").text() === "" ){
+                $("#mylat").parent().addClass("border border-danger")
+                $("#mylng").parent().addClass("border border-danger")
+                alert('Please enter coordinates.');
+            }else{
             logData.coordinatesLat = parseFloat($("#mylat").text());
             logData.coordinatesLng =  parseFloat($("#mylng").text());
-            logData.likes = 0;
-            logData.dislikes = 0;
-            logData.UserId = data.id;
             console.log(logData);
             //Post new sighting log with logData object
-            submitLog(logData);
             $("form.sightinglog, form.coordinate").trigger("reset");
             $("#mylat,#mylng").text("");
             $("#logging_modal").modal("toggle");
+            submitLog(logData);
+            };
         });
     });
 
@@ -109,24 +109,55 @@ $(document).ready(function () {
     //Submit new log function
     function submitLog(logData){
         console.log("submtting");
+        var data = [];
+        var rating = {
+            likes: 0,
+            dislikes: 0
+        }
         $.post("/api/sighting/log", logData, function() {
             alert("Sighting Logged");
         }).then(function(res){
-            createLogCard(res);
+            //sets data to res object
+            data = res;
+            //insert new rating object into data object
+            data.rating = rating;
+            createLogCard(data);
         });
     }
 
-    //Get all logs **Not finished need fuctinal data in sql to pull logs.
+    //Get all logs
     function getAllLogs(){
-        $.get("/api/ufo/sightings", function(data){
+        $.get("/api/ufo/sightings", function(res){
+        }).then(function(data){
+            console.log(data);
             for ( var i = 0; i < data.length; i++){
-                createLogCard(data[i]);
+                var logData = data[i];
+                console.log(logData);
+                getRating(logData).then(function(success){
+                    console.log(logData);
+                });
             }
+        });
+    }
+    
+    //Get likes and dislikes for a single log
+    function getRating(data){
+        var logData = data
+        return new Promise(function(reslove, reject){
+            $.get("/api/ufo/sightings/get_rating/"+data.id, function(res){
+                return reslove(res);
+            }).then(function(response){
+                //inserts response likes/dislikes object into single log data object
+                logData.rating = response;
+                console.log(logData);
+                createLogCard(logData);
+            });
         });
     }
 
     //Like button function
     $(document).on("click","button.likebutton",function(){
+        //checks if user is logged in
         if (!loggedin){
             alert("Please log in to rate log");
         }else{
@@ -140,47 +171,33 @@ $(document).ready(function () {
             }
             updateRating(ratingData).then(function(success){
                 console.log(success);  
-                if( success.code !== "Denied"){
-                    $.get("/api/ufo/sightings/get_rating/"+logID,function(data){
-
-                    }).then(function(response){
-                        console.log(response)
-                        $("#likelog"+logID).text(response.likes);
-                    });
-                    $(button).prop('disabled', false);
-                }else{
-                    alert(success.code+" : "+success.reason);
-                }
+                $("#likelog"+logID).text(success.likes);
+                $(button).prop('disabled', false);
+            }).catch(function(error){
+                alert(error.code+" : "+error.reason);
             });
         }
     });
 
     //DisLike button function
     $(document).on("click","button.dislikebutton",function(){
+        //checks if user is logged in
         if (!loggedin){
             alert("Please log in to rate log");
         }else{
             $(this).prop('disabled', true);
             var button = this;
+            var logID = $(button).attr("data-logid")
             var ratingData = {
                 userName: user_Name,
                 id: $(button).attr("data-logid"),
                 rating: "dislike"
             }
             updateRating(ratingData).then(function(success){
-                console.log(success);
-                var data = success[0];
-                var logDislikes = function (){
-                    for ( var i = 0; i < data.log_ratings.length; i++){
-                        var count = 0;
-                        if (data.log_ratings[i].rating === "dislike"){
-                            count++
-                        }
-                    }
-                    return count;
-                }
-                $("#dislikelog"+data.id).text(logDislikes);
+                $("#dislikelog"+logID).text(success.dislikes);
                 $(button).prop('disabled', false);
+            }).catch(function(error){
+                alert(error.code+" : "+error.reason);
             });
         }
     });
@@ -190,19 +207,23 @@ $(document).ready(function () {
         var ratingData = data;
         return new Promise(function(reslove, reject){
             $.post("/api/sighting/log/rating/"+ratingData.id, ratingData, function(res){
-            }).then(function(data){
-                // $.get("/api/ufo/sightings/"+ratingData.id, function(data){
-                // }).then(function(res){
-                //     //console.log(res);
-                //     return reslove(res);
-                // });
-                return reslove(data);
+            }).then(function(response){
+                if( response.code !== "Denied" ){
+                    $.get("/api/ufo/sightings/get_rating/"+ratingData.id,function(data){
+                    }).then(function(response){
+                        return reslove(response)
+                    });
+                }else{
+                    return reject(response);
+                }
             });
         });
     }
 
     //Log Card creation function
     function createLogCard(Data){
+        console.log("======Create Card=========")
+        console.log(Data)
         //Create Card Div
         var cardDiv = $("<div>").addClass("card m-2");
         //Creating row with no gutters
@@ -226,7 +247,7 @@ $(document).ready(function () {
                 //Log Data
                 var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D ,YYYY h:mm A")+"</span>-<span>"+Data.userName+"</span>")
             //Append to footer
-            divFooter.append(likeButton, "<span id='likelog"+Data.id+"'>"+Data.likes+"</span>", dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.dislikes+"</span>", footerData);
+            divFooter.append(likeButton, "<span id='likelog"+Data.id+"'>"+Data.rating.likes+"</span>", dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.rating.dislikes+"</span>", footerData);
             //Append all content to mainDiv
             mainDiv.append(headerDiv, bodyDiv, divFooter);
         //Append to row with no gutters

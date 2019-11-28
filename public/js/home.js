@@ -2,8 +2,6 @@ $(document).ready(function () {
 
     var loggedin = false;
     var user_Name = "";
-    getAllLogs();
-    userInfo();
 
       // Display user info
     function userInfo() {
@@ -278,4 +276,7 @@ $(document).ready(function () {
             $("#log_sighting").css("display", "inherit");
         }
     });
+
+    getAllLogs()
+    userInfo();
 });

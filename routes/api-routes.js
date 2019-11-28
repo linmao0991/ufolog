@@ -22,11 +22,24 @@ module.exports = function (app) {
       });
   });
 
-  // GET route for getting all logs ID
+  // GET route for getting all logs where ID equal parameter
   app.get("/api/ufo/sightings/:id", function (req, res) {
     db.ufo.findAll({
       where: {
         id: req.params.id
+      },
+      include: [db.log_rating]
+    }).then(function (dbufo) {
+      console.log(dbufo)
+      res.json(dbufo);
+    });
+  });
+
+  // GET route for getting all logs where ID equal parameter
+  app.get("/api/ufo/sightings/byuser/:id", function (req, res) {
+    db.ufo.findAll({
+      where: {
+        UserId: req.params.id
       },
       include: [db.log_rating]
     }).then(function (dbufo) {
@@ -103,35 +116,19 @@ module.exports = function (app) {
     } else {
       // Otherwise send back the user's email and id
       // Sending back a password, even a hashed password, isn't a good idea
-      res.json({
-        userName: req.user.userName,
-        id: req.user.id
+      db.User.findOne({
+        where: {
+          id: req.user.id
+        }
+      }).then(function(data){
+        res.json({
+          userName: req.user.userName,
+          id: req.user.id,
+          aboutMe: data.aboutMe
+        });
       });
     }
   });
-
-  // Post route for like/dislike updating for log.
-  // app.put("/api/sighting/log/rating/:id", function (req, res) {
-  //   if (req.body.rating === "like") {
-  //     db.ufo.findOne({
-  //       where: {
-  //         id: req.params.id
-  //       }
-  //     },).then(function (dbufo) {
-  //       dbufo.increment("likes");
-  //       res.json(dbufo);
-  //     });
-  //   } else {
-  //     db.ufo.findOne({
-  //       where: {
-  //         id: req.params.id
-  //       }
-  //     }, ).then(function (dbufo) {
-  //       dbufo.increment("dislikes");
-  //       res.json(dbufo);
-  //     });
-  //   }
-  // });
 
   app.post("/api/sighting/log/rating/:id", function (req, res) {
     db.log_rating.findOne({
@@ -157,7 +154,6 @@ module.exports = function (app) {
               rating: req.body.rating,
               ufoId: req.params.id
           }).then(function (dblogratings) {
-            //dblogratings.increment("likes");
             return res.json(dblogratings);
           });
         } else {
@@ -169,7 +165,6 @@ module.exports = function (app) {
             rating: req.body.rating,
             ufoId: req.params.id
           }).then(function (dblogratings) {
-            //dblogratings.increment("dislikes");
             return res.json(dblogratings);
           });
         }

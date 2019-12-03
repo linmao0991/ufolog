@@ -29,7 +29,6 @@ module.exports = function(sequelize, DataTypes) {
           type: DataTypes.STRING,
           validate:{
               len: [1],
-              isUrl: true,
           }
       },
       coordinatesLat:{
@@ -37,12 +36,6 @@ module.exports = function(sequelize, DataTypes) {
       },
       coordinatesLng:{
         type: DataTypes.FLOAT
-      },
-      likes:{
-        type: DataTypes.INTEGER
-      },
-      dislikes:{
-        type: DataTypes.INTEGER
       }
     });
 
@@ -55,6 +48,11 @@ module.exports = function(sequelize, DataTypes) {
       });
     };
 
+    ufo.associate = function(models) {
+      ufo.hasMany(models.log_rating, {
+        onDelete: "cascade"
+      });
+    };
     return ufo;
   };
   

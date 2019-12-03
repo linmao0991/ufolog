@@ -14,20 +14,66 @@ var passport = require("../config/passport");
 module.exports = function (app) {
   // GET route for getting all of the ufo sightings
   app.get("/api/ufo/sightings", function (req, res) {
-    db.ufo.findAll({})
+    db.ufo.findAll({
+    })
       .then(function (dbufo) {
+        // console.log(dbufo);
         res.json(dbufo);
       });
   });
 
-  // GET route for getting all logs by user ID
+  // GET route for getting all logs where ID equal parameter
   app.get("/api/ufo/sightings/:id", function (req, res) {
     db.ufo.findAll({
       where: {
         id: req.params.id
-      }
+      },
+      include: [db.log_rating]
     }).then(function (dbufo) {
+      // console.log(dbufo)
       res.json(dbufo);
+    });
+  });
+
+  // GET route for getting all logs where ID equal parameter
+  app.get("/api/ufo/sightings/byuser/:id", function (req, res) {
+    db.ufo.findAll({
+      where: {
+        UserId: req.params.id
+      },
+      include: [db.log_rating]
+    }).then(function (dbufo) {
+      // console.log(dbufo)
+      res.json(dbufo);
+    });
+  });
+
+  app.get("/api/ufo/sightings/get_rating/:id", function( req, res){
+    // console.log("*****************************");
+    // console.log("get_rating data");
+    // console.log(req.body);
+    var rating = {}
+    db.log_rating.count({
+      where: {
+        ufoId: req.params.id,
+        rating: "like"
+      }
+    }).then(function(result){
+      rating.likes = result;
+      // console.log(result);
+      // console.log("*****************************");
+      db.log_rating.count({
+        where: {
+          ufoId: req.params.id,
+          rating: "dislike"
+        }
+      }).then(function(result){
+        rating.dislikes = result;
+        // console.log(result);
+        // console.log("*****************************");
+        // console.log(rating);
+        res.json(rating);
+      });
     });
   });
 
@@ -46,13 +92,14 @@ module.exports = function (app) {
     db.User.create({
       userName: req.body.userName,
       password: req.body.password,
-      aboutMe: req.body.aboutMe
+      aboutMe: req.body.aboutMe,
+      profileurl: req.file
     })
       .then(function() {
         res.redirect(307, "/api/login");
       })
       .catch(function(err) {
-        console.log(db.User);
+        // console.log(db.User);
         res.status(401).json(err);
       });
   });
@@ -71,34 +118,70 @@ module.exports = function (app) {
     } else {
       // Otherwise send back the user's email and id
       // Sending back a password, even a hashed password, isn't a good idea
-      res.json({
-        userName: req.user.userName,
-        id: req.user.id
+      db.User.findOne({
+        where: {
+          id: req.user.id
+        }
+      }).then(function(data){
+        res.json({
+          userName: req.user.userName,
+          id: req.user.id,
+          aboutMe: data.aboutMe
+        });
       });
     }
   });
 
-  // Post route for like/dislike updating for log.
-  app.put("/api/sighting/log/rating/:id", function (req, res) {
-    if (req.body.rating === "like") {
-      db.ufo.findOne({
-        where: {
-          id: req.params.id
+  app.post("/api/sighting/log/rating/:id", function (req, res) {
+    db.log_rating.findOne({
+      where: {
+        ufoId: req.params.id,
+        userName: req.body.userName
+      }
+    }).then(function(data){
+      // console.log("=============")
+      // console.log("Data")
+      // console.log(data);
+      // console.log("=============")
+      if (data === null){
+        // console.log("=============")
+        // console.log("No Rating");
+        // console.log("=============")
+        if (req.body.rating === "like") {
+          // console.log("=============")
+          // console.log("like")
+          // console.log("=============")
+          db.log_rating.create({
+              userName: req.body.userName,
+              rating: req.body.rating,
+              ufoId: req.params.id
+          }).then(function (dblogratings) {
+            return res.json(dblogratings);
+          });
+        } else {
+          // console.log("=============")
+          // console.log("dislike")
+          // console.log("=============")
+          db.log_rating.create({
+            userName: req.body.userName,
+            rating: req.body.rating,
+            ufoId: req.params.id
+          }).then(function (dblogratings) {
+            return res.json(dblogratings);
+          });
         }
-      },).then(function (dbufo) {
-        dbufo.increment("likes");
-        res.json(dbufo);
-      });
-    } else {
-      db.ufo.findOne({
-        where: {
-          id: req.params.id
-        }
-      }, ).then(function (dbufo) {
-        dbufo.increment("dislikes");
-        res.json(dbufo);
-      });
-    }
+      }else{
+        var code = {
+          code: "Denied",
+          reason: "Already rated log"
+          }
+        // console.log("=============")
+        // console.log("Denied");
+        // console.log(code);
+        // console.log("=============")
+        return res.json(code);
+      }
+    })
   });
 
   // Post route for loging a new sighting

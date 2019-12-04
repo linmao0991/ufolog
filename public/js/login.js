@@ -32,8 +32,11 @@ $(document).ready(function() {
           window.location.replace("/profile");
         })
         // If there's an error, log the error
-        .catch(function(err){
-            console.log(err);
-        });
+        .catch(handleLoginErr);
+    }
+    function handleLoginErr(err) {
+      $("#alert2 .msg").text("Username or Password is incorrect");
+      console.log(err);
+      $("#alert2").fadeIn(500);
     }
   });

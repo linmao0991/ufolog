@@ -1,0 +1,5 @@
+use ufo;
+
+INSERT INTO Users (userName, profileUrl, email, aboutMe, userPassword) VALUES ("Stevo51", "https://cdn.images.express.co.uk/img/dynamic/80/590x/Aliens-on-Earth-breed-humans-extraterrestrials-UFO-Young-hae-chi-oxford-university-1119753.jpg?r=1561707470341", "steve51@steve@hotmail.com","We are not alone and that makes me feel better about my relationship status.","password");
+INSERT INTO Users (userName, profileUrl, email, aboutMe, userPassword) VALUES ("Stevo52", "https://cdn.images.express.co.uk/img/dynamic/80/590x/Aliens-on-Earth-breed-humans-extraterrestrials-UFO-Young-hae-chi-oxford-university-1119753.jpg?r=1561707470341", "steve52@steve@hotmail.com","We are not alone and that makes me feel better about my relationship status.","password");
+INSERT INTO Users (userName, profileUrl, email, aboutMe, userPassword) VALUES ("Stevo53", "https://cdn.images.express.co.uk/img/dynamic/80/590x/Aliens-on-Earth-breed-humans-extraterrestrials-UFO-Young-hae-chi-oxford-university-1119753.jpg?r=1561707470341", "steve53@steve@hotmail.com","We are not alone and that makes me feel better about my relationship status.","password");

@@ -94,6 +94,10 @@
                         <input type="password" class="form-control" id="signup-password-input" placeholder="Password"
                             required="required">
                     </div>
+                    <div style="display: none" id="alert" class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> <span class="msg"></span>
+                    </div>
                     <button type="submit" class="btn btn-secondary">Submit</button>
                 </form>
                 <div class="modal-footer">
@@ -123,6 +127,10 @@
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="login-password-input" placeholder="Password"
                             required="required">
+                    </div>
+                    <div style="display: none" id="alert2" class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> <span class="msg"></span>
                     </div>
                     <button type="submit" class="btn btn-secondary">Submit</button>
                 </form>
@@ -221,7 +229,7 @@
 
     <!-- Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbhXgrsIy0EMpOtt6qTX0S2XEf4cLcDOA&callback=initMap"
-    async defer></script>
+        async defer></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"

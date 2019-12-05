@@ -8,11 +8,49 @@ $(document).ready(function () {
     // Profile Image on Sign Up
 
   $("#profileImg").on("change", function(){
-    var files = $("#profileImg").get(0).files;
+    var files = document.getElementById("profileImg").files;
     var file = files[0];
-    formData.append("photo", file, file.name);
+    console.log(file);
+    console.log(file.type);
+    getSignedRequest(file);
+    //formData.append("photo", file, file.name);
     console.log(formData);
   });
+
+  function getSignedRequest(file){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
+    xhr.onreadystatechange = () => {
+      if(xhr.readyState === 4){
+        if(xhr.status === 200){
+          var response = JSON.parse(xhr.responseText);
+          uploadFile(file, response.signedRequest, response.url);
+        }
+        else{
+          alert('Could not get signed URL.');
+        }
+      }
+    };
+    xhr.send();
+  }
+
+  function uploadFile(file, signedRequest, url){
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', signedRequest);
+    xhr.onreadystatechange = () => {
+      if(xhr.readyState === 4){
+        if(xhr.status === 200){
+          document.getElementById('preview').src = url;
+          //document.getElementById('avatar-url').value = url;
+        }
+        else{
+          alert('Could not upload file.');
+        }
+      }
+    };
+    xhr.send(file);
+  }
+  
 
   // When the signup button is clicked, we validate the email and password are not blank
   signUpForm.on("submit", function (event) {
@@ -20,18 +58,19 @@ $(document).ready(function () {
       var userData = {
       userName: usernameInput.val().trim(),
       password: passwordInput.val().trim(),
-      aboutMe: aboutMeInput.val().trim()
+      aboutMe: aboutMeInput.val().trim(),
+      profileurl: $("#preview").attr("src")
     };
 
     if (!userData.userName || !userData.password) {
       return;
     }
     uploadPhoto(formData).then(function(success){
-      signUpUser(userData.userName, userData.password, success[0].publicPath, userData.aboutMe);
+      signUpUser(userData.userName, userData.password,userData.profileurl, userData.aboutMe);
       usernameInput.val("");
       passwordInput.val("");
       aboutMeInput.val("");
-      $("#profileImg").val("");
+      $("#preview").attr("src","");
     });
   });
 

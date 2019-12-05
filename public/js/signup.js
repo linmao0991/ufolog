@@ -4,12 +4,15 @@ $(document).ready(function () {
   var usernameInput = $("input#signup-username-input");
   var passwordInput = $("input#signup-password-input");
   var aboutMeInput = $("input#signup-aboutMe-input");
-
+  var formData = new FormData();
     // Profile Image on Sign Up
-    $("#signup-aboutMe-input").on("click",function (event) {
-      var image = document.getElementById('output');
-      image.src = $("#signup-profileurl-input").val();
-    });
+
+  $("#profileImg").on("change", function(){
+    var files = $("#profileImg").get(0).files;
+    var file = files[0];
+    formData.append("photo", file, file.name);
+    console.log(formData);
+  });
 
   // When the signup button is clicked, we validate the email and password are not blank
   signUpForm.on("submit", function (event) {
@@ -23,20 +26,23 @@ $(document).ready(function () {
     if (!userData.userName || !userData.password) {
       return;
     }
-    // If we have a username and password, run the signUpUser function
-    signUpUser(userData.userName, userData.password, /*userData.profileurl,*/ userData.aboutMe);
-    usernameInput.val("");
-    passwordInput.val("");
-    aboutMeInput.val("");
+    uploadPhoto(formData).then(function(success){
+      signUpUser(userData.userName, userData.password, success[0].publicPath, userData.aboutMe);
+      usernameInput.val("");
+      passwordInput.val("");
+      aboutMeInput.val("");
+      $("#profileImg").val("");
+    });
   });
 
   // Does a post to the signup route. If successful, we are redirected to the members page
   // Otherwise we log any errors
-  function signUpUser(userName, password, /*profileurl,*/ aboutMe) {
+  function signUpUser(userName, password, profileurl, aboutMe) {
+    console.log(profileurl)
     $.post("/api/signup", {
         userName: userName,
         password: password,
-        // profileurl: image,
+        profileurl: profileurl,
         aboutMe: aboutMe
       })
       .then(function (data) {
@@ -50,5 +56,20 @@ $(document).ready(function () {
     $("#alert .msg").text(err.responseJSON.errors[0].message);
     console.log(err)
     $("#alert").fadeIn(500);
+  }
+
+  function uploadPhoto(fileData){
+    return new Promise(function (reslove, reject) {
+      $.ajax({
+        url: "/profileImg/upload",
+        data: fileData,
+        contentType: false,
+        processData: false,
+        method: "POST",
+        success: function(data){
+          return reslove(data)
+        }
+      });
+    });
   }
 });

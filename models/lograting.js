@@ -17,8 +17,7 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     log_rating.associate = function (models) {
-      models.log_rating.belongsTo(models.ufo, {
-        onDelete: "CASCADE",
+      log_rating.belongsTo(models.ufo, {
         foreignKey: {
           allowNull: false
         }

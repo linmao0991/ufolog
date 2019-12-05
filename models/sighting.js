@@ -40,15 +40,11 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     ufo.associate = function (models) {
-      models.ufo.belongsTo(models.User, {
-        onDelete: "CASCADE",
+      ufo.belongsTo(models.User, {
         foreignKey: {
           allowNull: false
         }
       });
-    };
-
-    ufo.associate = function(models) {
       ufo.hasMany(models.log_rating, {
         onDelete: "cascade"
       });

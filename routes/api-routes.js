@@ -8,6 +8,11 @@
 // Requiring our Todo model
 var db = require("../models");
 var passport = require("../config/passport");
+var formidable = require('formidable');
+var path = require('path');
+var fs = require('fs');
+var readChunk = require('read-chunk');
+var fileType = require('file-type');
 
 // Routes
 // =============================================================
@@ -29,7 +34,6 @@ module.exports = function (app) {
       },
       include: [db.log_rating]
     }).then(function (dbufo) {
-      // console.log(dbufo)
       res.json(dbufo);
     });
   });
@@ -42,15 +46,11 @@ module.exports = function (app) {
       },
       include: [db.log_rating]
     }).then(function (dbufo) {
-      // console.log(dbufo)
       res.json(dbufo);
     });
   });
 
   app.get("/api/ufo/sightings/get_rating/:id", function (req, res) {
-    // console.log("*****************************");
-    // console.log("get_rating data");
-    // console.log(req.body);
     var rating = {}
     db.log_rating.count({
       where: {
@@ -59,8 +59,6 @@ module.exports = function (app) {
       }
     }).then(function (result) {
       rating.likes = result;
-      // console.log(result);
-      // console.log("*****************************");
       db.log_rating.count({
         where: {
           ufoId: req.params.id,
@@ -68,9 +66,6 @@ module.exports = function (app) {
         }
       }).then(function (result) {
         rating.dislikes = result;
-        // console.log(result);
-        // console.log("*****************************");
-        // console.log(rating);
         res.json(rating);
       });
     });
@@ -92,13 +87,12 @@ module.exports = function (app) {
         userName: req.body.userName,
         password: req.body.password,
         aboutMe: req.body.aboutMe,
-        profileurl: req.file
+        profileurl: req.body.profileurl
       })
       .then(function () {
         res.redirect(307, "/api/login");
       })
       .catch(function (err) {
-        // console.log(db.User);
         res.status(401).json(err);
       });
   });
@@ -125,6 +119,7 @@ module.exports = function (app) {
         res.json({
           userName: req.user.userName,
           id: req.user.id,
+          profileurl: data.profileurl,
           aboutMe: data.aboutMe
         });
       });
@@ -138,18 +133,8 @@ module.exports = function (app) {
         userName: req.body.userName
       }
     }).then(function (data) {
-      // console.log("=============")
-      // console.log("Data")
-      // console.log(data);
-      // console.log("=============")
       if (data === null) {
-        // console.log("=============")
-        // console.log("No Rating");
-        // console.log("=============")
         if (req.body.rating === "like") {
-          // console.log("=============")
-          // console.log("like")
-          // console.log("=============")
           db.log_rating.create({
             userName: req.body.userName,
             rating: req.body.rating,
@@ -158,9 +143,6 @@ module.exports = function (app) {
             return res.json(dblogratings);
           });
         } else {
-          // console.log("=============")
-          // console.log("dislike")
-          // console.log("=============")
           db.log_rating.create({
             userName: req.body.userName,
             rating: req.body.rating,
@@ -174,10 +156,6 @@ module.exports = function (app) {
           code: "Denied",
           reason: "Already rated log"
         }
-        // console.log("=============")
-        // console.log("Denied");
-        // console.log(code);
-        // console.log("=============")
         return res.json(code);
       }
     })
@@ -187,6 +165,140 @@ module.exports = function (app) {
   app.post("/api/sighting/log", function (req, res) {
     db.ufo.create(req.body).then(function (dbUfo) {
       res.json(dbUfo);
+    });
+  });
+
+  //Upload Profile Image
+  app.post("/profileImg/upload", function (req, res){
+    var photos = [];
+    var form = new formidable.IncomingForm();
+    // Upload directory for the images
+    form.uploadDir = "public/imgs/";
+    // Keep file extensions
+    form.keepExtensions = true;
+    // Sets formibale to only accept single files.
+    form.multiples = false;
+    // Invoked when a file has finished uploading.
+    form.on("file", function ( name, file){
+      //Only allow one file
+      if (photos.length === 1) {
+        fs.unlink(file.path);
+        return true;
+      }
+      // Read a chunk of the file.
+      var buffer = null;
+      // Get the file type using the buffer read using read-chunk
+      var type = null;
+      var filename = "";
+
+      buffer = readChunk.sync(file.path, 0, 262);
+      type = fileType(buffer);
+
+      //Checks file extensions
+      if (type !== null && (type.ext === 'png' || type.ext === 'jpg' || type.ext === 'jpeg')){
+        // Assign new file name
+        filename = Date.now() + '-' + file.name;
+
+        // Move the file with the new file name
+        fs.rename(file.path, "public/imgs/profile/" + filename, function(err){
+          if (err) throw err;
+        } );
+
+        photos.push({
+          status: true,
+          filename: filename,
+          type: type.ext,
+          publicPath: "../imgs/profile/" + filename
+        });
+      }else{
+        photos.push({
+          status: false,
+          filename: file.name,
+          message: 'Invalid file type'
+        });
+        fs.unlink(file.path);
+      }
+    });
+
+    form.on('error', function(err) {
+      console.log('Error occurred during processing - ' + err);
+    });
+
+    // Invoked when all the fields have been processed.
+    form.on('end', function() {
+      console.log('All the request fields have been processed.');
+    });
+
+    // Parse the incoming form fields.
+    form.parse(req, function (err, fields, files) {
+      res.status(200).json(photos);
+    });
+  });
+
+  //Upload Log Image
+  app.post("/logImg/upload", function (req, res){
+    var photos = [];
+    var form = new formidable.IncomingForm();
+    // Upload directory for the images
+    form.uploadDir = "public/imgs/";
+    // Keep file extensions
+    form.keepExtensions = true;
+    // Sets formibale to only accept single files.
+    form.multiples = false;
+    // Invoked when a file has finished uploading.
+    form.on("file", function ( name, file){
+      //Only allow one file
+      if (photos.length === 1) {
+        fs.unlink(file.path);
+        return true;
+      }
+      // Read a chunk of the file.
+      var buffer = null;
+      // Get the file type using the buffer read using read-chunk
+      var type = null;
+      var filename = "";
+
+      buffer = readChunk.sync(file.path, 0, 262);
+      type = fileType(buffer);
+
+      //Checks file extensions
+      if (type !== null && (type.ext === 'png' || type.ext === 'jpg' || type.ext === 'jpeg')){
+        // Assign new file name
+        filename = Date.now() + '-' + file.name;
+
+        // Move the file with the new file name
+        fs.rename(file.path, "public/imgs/log/" + filename, function(err){
+          if (err) throw err;
+        } );
+
+        photos.push({
+          status: true,
+          filename: filename,
+          type: type.ext,
+          publicPath: "../imgs/log/" + filename
+        });
+      }else{
+        photos.push({
+          status: false,
+          filename: file.name,
+          message: 'Invalid file type'
+        });
+        fs.unlink(file.path);
+      }
+    });
+
+    form.on('error', function(err) {
+      console.log('Error occurred during processing - ' + err);
+    });
+
+    // Invoked when all the fields have been processed.
+    form.on('end', function() {
+      console.log('All the request fields have been processed.');
+    });
+
+    // Parse the incoming form fields.
+    form.parse(req, function (err, fields, files) {
+      res.status(200).json(photos);
     });
   });
 

@@ -187,18 +187,52 @@ $(document).ready(function () {
     });
 
     $("#logImg").on("change", function(){
-        var files = $("#logImg").get(0).files;
+        var files = document.getElementById("logImg").files;
         var file = files[0];
-        formData.append("photo", file, file.name);
-        console.log(formData);
+        getSignedRequest(file);
+        //**Code below this is used for uploading to local storage */
+        //formData.append("photo", file, file.name);
     });
+
+    function getSignedRequest(file){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
+        xhr.onreadystatechange = () => {
+            if(xhr.readyState === 4){
+            if(xhr.status === 200){
+                var response = JSON.parse(xhr.responseText);
+                uploadFile(file, response.signedRequest, response.url);
+            }
+            else{
+                alert('Could not get signed URL.');
+            }
+            }
+        };
+        xhr.send();
+    }
+    
+    function uploadFile(file, signedRequest, url){
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', signedRequest);
+    xhr.onreadystatechange = () => {
+        if(xhr.readyState === 4){
+        if(xhr.status === 200){
+            document.getElementById('ufo-preview').src = url;
+            //document.getElementById('avatar-url').value = url;
+        }
+        else{
+            alert('Could not upload file.');
+        }
+        }
+    };
+    xhr.send(file);
+    }
 
     // Sighting log form submission
     $("form.sightinglog").on("submit", function (event) {
         event.preventDefault();
         var logData = {};
         $.get("/api/user_data", function (err, res) {}).then(function (data) {
-            // console.log(data);
             //Creating log data object
             logData.rating = {
                 likes: 0,
@@ -209,8 +243,7 @@ $(document).ready(function () {
             logData.title = $("#log_title").val().trim();
             logData.description = $("#log_description").val();
             logData.category = "UFO";
-            // logData.UserId = data.id;
-            // console.log($("#mylat").text());
+            logData.image = $("#ufo-preview").attr("src");
             if ($("#mylat").text() === "" || $("#mylng").text() === "") {
                 $("#mylat").parent().addClass("border border-danger")
                 $("#mylng").parent().addClass("border border-danger")
@@ -222,11 +255,8 @@ $(document).ready(function () {
                 $("#mylat,#mylng").text("");
                 $("#logging_modal").modal("toggle");
                 console.log("Line 223");
-                uploadLogPhoto(formData).then(function(success){
-                    logData.image = success[0].publicPath;
-                    console.log(logData.image);
-                    submitLog(logData);
-                });
+                console.log(logData.image);
+                submitLog(logData);
             };
         });
     });
@@ -249,21 +279,22 @@ $(document).ready(function () {
         }
     });
     
-    function uploadLogPhoto(fileData){
-        console.log("Upload Log Photo")
-        return new Promise(function (reslove, reject) {
-          $.ajax({
-            url: "/logImg/upload",
-            data: fileData,
-            contentType: false,
-            processData: false,
-            method: "POST",
-            success: function(data){
-              return reslove(data)
-            }
-          });
-        });
-      }
+    //**Function for Uploading photos to local folder, does not work on GitHub */
+    // function uploadLogPhoto(fileData){
+    //     console.log("Upload Log Photo")
+    //     return new Promise(function (reslove, reject) {
+    //       $.ajax({
+    //         url: "/logImg/upload",
+    //         data: fileData,
+    //         contentType: false,
+    //         processData: false,
+    //         method: "POST",
+    //         success: function(data){
+    //           return reslove(data)
+    //         }
+    //       });
+    //     });
+    //   }
 
     //Submit new log function
     function submitLog(logData) {

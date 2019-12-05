@@ -6,6 +6,7 @@
 // =============================================================
 
 // Requiring our Todo model
+require('dotenv').config();
 var db = require("../models");
 var passport = require("../config/passport");
 var formidable = require('formidable');
@@ -14,8 +15,10 @@ var fs = require('fs');
 var readChunk = require('read-chunk');
 var fileType = require('file-type');
 var aws = require('aws-sdk');
-aws.config.region = "us-east-2"
-
+aws.config.region = "us-east-2";
+var Bucket_Name = process.env.AWS_BUCKET_NAME;
+var User_Key = process.env.AWS_ACCESS_KEY;
+var Secret_Key = process.env.AWS_SECRET_ACCESS_KEY;
 // Routes
 // =============================================================
 module.exports = function (app) {
@@ -301,12 +304,17 @@ module.exports = function (app) {
   // });
 
   app.get('/sign-s3', function(req, res) {
-    var s3 = new aws.S3();
+    var s3 = new aws.S3({
+      accessKeyId: User_Key,
+      secretAccessKey: Secret_Key,
+    });
+
     var fileName = req.query['file-name'];
     var fileType = req.query['file-type'];
+    var uniqueName = Date.now()+"-"+fileName;
     var s3Params = {
-      Bucket: S3_BUCKET,
-      Key: fileName,
+      Bucket: Bucket_Name,
+      Key: uniqueName,
       Expires: 60,
       ContentType: fileType,
       ACL: 'public-read'
@@ -317,10 +325,9 @@ module.exports = function (app) {
         console.log(err);
         return res.end();
       }
-      var uniqueName = Date.now()+"-"+fileName;
       var returnData = {
         signedRequest: data,
-        url: `https://${S3_BUCKET}.s3.amazonaws.com/${uniqueName}`
+        url: `https://${Bucket_Name}.s3.amazonaws.com/${uniqueName}`
       };
       res.write(JSON.stringify(returnData));
       res.end();

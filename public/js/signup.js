@@ -4,17 +4,16 @@ $(document).ready(function () {
   var usernameInput = $("input#signup-username-input");
   var passwordInput = $("input#signup-password-input");
   var aboutMeInput = $("input#signup-aboutMe-input");
-  var formData = new FormData();
-    // Profile Image on Sign Up
+  //**Code below this is used for uploading to local storage */
+  //var formData = new FormData();
 
+  // Profile Image on Sign Up
   $("#profileImg").on("change", function(){
     var files = document.getElementById("profileImg").files;
     var file = files[0];
-    console.log(file);
-    console.log(file.type);
     getSignedRequest(file);
+    //**Code below this is used for uploading to local storage */
     //formData.append("photo", file, file.name);
-    console.log(formData);
   });
 
   function getSignedRequest(file){
@@ -65,13 +64,11 @@ $(document).ready(function () {
     if (!userData.userName || !userData.password) {
       return;
     }
-    uploadPhoto(formData).then(function(success){
       signUpUser(userData.userName, userData.password,userData.profileurl, userData.aboutMe);
       usernameInput.val("");
       passwordInput.val("");
       aboutMeInput.val("");
       $("#preview").attr("src","");
-    });
   });
 
   // Does a post to the signup route. If successful, we are redirected to the members page
@@ -97,18 +94,19 @@ $(document).ready(function () {
     $("#alert").fadeIn(500);
   }
 
-  function uploadPhoto(fileData){
-    return new Promise(function (reslove, reject) {
-      $.ajax({
-        url: "/profileImg/upload",
-        data: fileData,
-        contentType: false,
-        processData: false,
-        method: "POST",
-        success: function(data){
-          return reslove(data)
-        }
-      });
-    });
-  }
+  //** Function to save image to local folder, does not work with GitHub */
+  // function uploadPhoto(fileData){
+  //   return new Promise(function (reslove, reject) {
+  //     $.ajax({
+  //       url: "/profileImg/upload",
+  //       data: fileData,
+  //       contentType: false,
+  //       processData: false,
+  //       method: "POST",
+  //       success: function(data){
+  //         return reslove(data)
+  //       }
+  //     });
+  //   });
+  // }
 });

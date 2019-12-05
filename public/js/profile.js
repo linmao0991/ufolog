@@ -3,7 +3,7 @@ $(document).ready(function () {
 
   var loggedin = false;
   var user_Name = "";
-  var user_Id;
+  var formData = new FormData();
 
   // Display user info
   function userInfo() {
@@ -14,6 +14,7 @@ $(document).ready(function () {
         console.log(data);
         $("#profile-description").text(data.aboutMe);
         $(".profile-name").text(data.userName);
+        $("img#profileImg").attr("src", data.profileurl)
         getAllLogs(data.id)
       }else{
         alert("Error: Not Logged in!");
@@ -42,42 +43,52 @@ $(document).ready(function () {
     $("#mylat").text(mylat);
     $("#mylng").text(mylng);
     $("#coordinate_modal").modal("toggle");
-  })
+  });
+
+  $("#logImg").on("change", function(){
+    var files = $("#logImg").get(0).files;
+    var file = files[0];
+    formData.append("photo", file, file.name);
+    console.log(formData);
+  });
 
   // Sighting log form submission
   $("form.sightinglog").on("submit", function (event) {
     event.preventDefault();
     var logData = {};
     $.get("/api/user_data", function (err, res) {}).then(function (data) {
-      console.log(data);
-      //Creating log data object
-      logData.rating = {
-        likes: 0,
-        dislikes: 0
-      };
-      logData.userName = data.userName;
-      logData.title = $("#log_title").val().trim();
-      logData.description = $("#log_description").val();
-      logData.category = "UFO";
-      logData.image = $("#log_image").val().trim();
-      logData.UserId = data.id;
-      console.log($("#mylat").text());
-      if ($("#mylat").text() === "" || $("#mylng").text() === "") {
-        $("#mylat").parent().addClass("border border-danger")
-        $("#mylng").parent().addClass("border border-danger")
-        alert('Please enter coordinates.');
-      } else {
-        logData.coordinatesLat = parseFloat($("#mylat").text());
-        logData.coordinatesLng = parseFloat($("#mylng").text());
-        console.log(logData);
-        //Post new sighting log with logData object
-        $("form.sightinglog, form.coordinate").trigger("reset");
-        $("#mylat,#mylng").text("");
-        $("#logging_modal").modal("toggle");
-        submitLog(logData);
-      };
+        // console.log(data);
+        //Creating log data object
+        logData.rating = {
+            likes: 0,
+            dislikes: 0
+        };
+        logData.userName = data.userName;
+        logData.UserId = data.id;
+        logData.title = $("#log_title").val().trim();
+        logData.description = $("#log_description").val();
+        logData.category = "UFO";
+        // logData.UserId = data.id;
+        // console.log($("#mylat").text());
+        if ($("#mylat").text() === "" || $("#mylng").text() === "") {
+            $("#mylat").parent().addClass("border border-danger")
+            $("#mylng").parent().addClass("border border-danger")
+            alert('Please enter coordinates.');
+        } else {
+            logData.coordinatesLat = parseFloat($("#mylat").text());
+            logData.coordinatesLng = parseFloat($("#mylng").text());
+            $("form.sightinglog, form.coordinate").trigger("reset");
+            $("#mylat,#mylng").text("");
+            $("#logging_modal").modal("toggle");
+            console.log("Line 223");
+            uploadLogPhoto(formData).then(function(success){
+                logData.image = success[0].publicPath;
+                console.log(logData.image);
+                submitLog(logData);
+            });
+        };
     });
-  });
+});
 
   //Get coordinates button
   //**Add a loading animation while getting coordinates
@@ -96,6 +107,22 @@ $(document).ready(function () {
       alert("Geolocation is not supported by this browser.");
     }
   });
+
+  function uploadLogPhoto(fileData){
+    console.log("Upload Log Photo")
+    return new Promise(function (reslove, reject) {
+      $.ajax({
+        url: "/logImg/upload",
+        data: fileData,
+        contentType: false,
+        processData: false,
+        method: "POST",
+        success: function(data){
+          return reslove(data)
+        }
+      });
+    });
+  }
 
   //Submit new log function
   function submitLog(logData) {
@@ -212,43 +239,43 @@ $(document).ready(function () {
 
   //Log Card creation function
   function createLogCard(Data) {
-    console.log("======Create Card=========")
-    console.log(Data)
-    //Create Card Div
-    var cardDiv = $("<div>").addClass("card m-2");
-    //Creating row with no gutters
-    var rowDiv = $("<div>").addClass("row no-gutters");
-    //Creating Image div
-    var imgDiv = $("<div>").addClass("col-lg-4");
-    var img = $("<img>").addClass("card-img").attr({
-      "src": Data.image,
-      "alt": "UFO Image"
-    });
-    imgDiv.append(img);
+    // console.log("======Create Card=========")
+      // console.log(Data)
+      //Create Card Div
+      var cardDiv = $("<div>").addClass("card m-2 logCard");
+      //Creating row with no gutters
+      var rowDiv = $("<div>").addClass("row no-gutters");
+      //Creating Image div
+      var imgDiv = $("<div>").addClass("col-lg-4");
+      var img = $("<img>").addClass("card-img").attr({
+          "src": Data.image,
+          "alt": "UFO Image"
+      });
+      imgDiv.append(img);
 
-    //Create card content div
-    var mainDiv = $("<div>").addClass("col-lg-8");
-    var headerDiv = $("<div>").addClass("card-header border rounded").html("<h5>" + Data.title + "</h5");
-    var bodyDiv = $("<div>").addClass("card-body").html("<p>" + Data.description + "</p>");
-    var divFooter = $("<div>").addClass("card-footer").attr("id", "ufolog" + Data.id);
-    //Like Button
-    var likeButton = $("<button>").addClass("btn likebutton").attr("data-logid", Data.id);
-    likeButton.append("<i class='far fa-thumbs-up'></i>");
-    //Dislike Button
-    var dislikeButton = $("<button>").addClass("btn dislikebutton").attr("data-logid", Data.id);
-    dislikeButton.append("<i class='far fa-thumbs-down'></i>");
-    //Log Data
-    var footerData = $("<p>").addClass("float-right").html("<span>" + moment(Data.createdAt).format("MMM D ,YYYY h:mm A") + "</span>-<span>" + Data.userName + "</span>")
-    //Append to footer
-    divFooter.append(likeButton, "<span id='likelog" + Data.id + "'>" + Data.rating.likes + "</span>", dislikeButton, "<span id='dislikelog" + Data.id + "'> " + Data.rating.dislikes + "</span>", footerData);
-    //Append all content to mainDiv
-    mainDiv.append(headerDiv, bodyDiv, divFooter);
-    //Append to row with no gutters
-    rowDiv.append(imgDiv, mainDiv);
-    //Append to card Div
-    cardDiv.append(rowDiv);
-    //Append to html page
-    $("#log_display").append(cardDiv);
+      //Create card content div
+      var mainDiv = $("<div>").addClass("col-lg-8");
+      var headerDiv = $("<div>").addClass("card-header border-success border rounded").html("<h5>" + Data.title + "</h5");
+      var bodyDiv = $("<div>").addClass("card-body").html("<p>" + Data.description + "</p>");
+      var divFooter = $("<div>").addClass("card-footer").attr("id", "ufolog" + Data.id);
+      //Like Button
+      var likeButton = $("<button>").addClass("btn rateBtn likebutton").attr("data-logid", Data.id);
+      likeButton.append("<i class='far fa-thumbs-up'></i>");
+      //Dislike Button
+      var dislikeButton = $("<button>").addClass("btn rateBtn dislikebutton").attr("data-logid", Data.id);
+      dislikeButton.append("<i class='far fa-thumbs-down'></i>");
+      //Log Data
+      var footerData = $("<p>").addClass("float-right").html("<span>" + moment(Data.createdAt).format("MMM D, YYYY h:mm A ") + "</span>-<span> " + Data.userName + "</span>")
+      //Append to footer
+      divFooter.append(likeButton, "<span id='likelog" + Data.id + "'>" + Data.rating.likes + "</span>", dislikeButton, "<span id='dislikelog" + Data.id + "'> " + Data.rating.dislikes + "</span>", footerData);
+      //Append all content to mainDiv
+      mainDiv.append(headerDiv, bodyDiv, divFooter);
+      //Append to row with no gutters
+      rowDiv.append(imgDiv, mainDiv);
+      //Append to card Div
+      cardDiv.append(rowDiv);
+      //Append to html page
+      $("#log_display").prepend(cardDiv);
   };
 
   $.get("/api/user_data", function (data) {

@@ -79,10 +79,7 @@
                         <input type="text" class="form-control" id="signup-username-input" placeholder="Username">
                     </div>
                     <div class="form-group">
-
-                        <input class="form-control-file" type="file" accept="image/*" name="photo">
-                        <br>
-                        <p><img id="output" width="200" /></p>
+                        <input id="profileImg" type="file" accept="image/*" capture="camera" name="photo[]">
                     </div>
                     <div class="form-group">
                         <label for="aboutMe">Profile Description</label>
@@ -162,9 +159,9 @@
                             required="required"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="sighting_image">Image URL</label>
-                        <textarea rows="1" col="50" class="form-control" id="log_image"
-                            placeholder="Enter a url link to your image."></textarea>
+                        <label for="sighting_image">Upload Image</label>
+                        <br>
+                        <input id="logImg" type="file" accept="image/*" capture="camera" name="photo[]">
                     </div>
                     <div>
                         <p>Latitude: <span id="mylat" required="required"></span> Longitude: <span id="mylng"

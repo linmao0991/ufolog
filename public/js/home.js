@@ -138,6 +138,7 @@ $(document).ready(function () {
 
     var loggedin = false;
     var user_Name = "";
+    var formData = new FormData();
 
     // Display user info
     function userInfo() {
@@ -185,6 +186,13 @@ $(document).ready(function () {
         $("#coordinate_modal").modal("toggle");
     });
 
+    $("#logImg").on("change", function(){
+        var files = $("#logImg").get(0).files;
+        var file = files[0];
+        formData.append("photo", file, file.name);
+        console.log(formData);
+    });
+
     // Sighting log form submission
     $("form.sightinglog").on("submit", function (event) {
         event.preventDefault();
@@ -197,10 +205,10 @@ $(document).ready(function () {
                 dislikes: 0
             };
             logData.userName = data.userName;
+            logData.UserId = data.id;
             logData.title = $("#log_title").val().trim();
             logData.description = $("#log_description").val();
             logData.category = "UFO";
-            logData.image = $("#log_image").val().trim();
             // logData.UserId = data.id;
             // console.log($("#mylat").text());
             if ($("#mylat").text() === "" || $("#mylng").text() === "") {
@@ -210,22 +218,15 @@ $(document).ready(function () {
             } else {
                 logData.coordinatesLat = parseFloat($("#mylat").text());
                 logData.coordinatesLng = parseFloat($("#mylng").text());
-
-                // var marker = new google.maps.Marker({
-                //     position: {
-                //         lat: logData.coordinatesLat,
-                //         lng: logData.coordinatesLng
-                //     },
-                //     map: map,
-                //     title: 'Sighting'
-                //   });
-                //   marker.setMap(map);
-                // console.log(logData);
-                //Post new sighting log with logData object
                 $("form.sightinglog, form.coordinate").trigger("reset");
                 $("#mylat,#mylng").text("");
                 $("#logging_modal").modal("toggle");
-                submitLog(logData);
+                console.log("Line 223");
+                uploadLogPhoto(formData).then(function(success){
+                    logData.image = success[0].publicPath;
+                    console.log(logData.image);
+                    submitLog(logData);
+                });
             };
         });
     });
@@ -247,6 +248,22 @@ $(document).ready(function () {
             alert("Geolocation is not supported by this browser.");
         }
     });
+    
+    function uploadLogPhoto(fileData){
+        console.log("Upload Log Photo")
+        return new Promise(function (reslove, reject) {
+          $.ajax({
+            url: "/logImg/upload",
+            data: fileData,
+            contentType: false,
+            processData: false,
+            method: "POST",
+            success: function(data){
+              return reslove(data)
+            }
+          });
+        });
+      }
 
     //Submit new log function
     function submitLog(logData) {
@@ -409,7 +426,7 @@ $(document).ready(function () {
         //Append to card Div
         cardDiv.append(rowDiv);
         //Append to html page
-        $("#log_display").append(cardDiv);
+        $("#log_display").prepend(cardDiv);
     };
 
     $.get("/api/user_data", function (data) {

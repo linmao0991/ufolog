@@ -16,7 +16,7 @@ var readChunk = require('read-chunk');
 var fileType = require('file-type');
 var aws = require('aws-sdk');
 aws.config.region = "us-east-2";
-var Bucket_Name = process.env.AWS_BUCKET_NAME;
+var Bucket_Name = process.env.S3_BUCKET;
 var User_Key = process.env.AWS_ACCESS_KEY;
 var Secret_Key = process.env.AWS_SECRET_ACCESS_KEY;
 // Routes

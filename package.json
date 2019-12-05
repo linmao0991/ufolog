@@ -23,6 +23,7 @@
     "file-type": "^12.4.0",
     "formidable": "^1.2.1",
     "google-maps": "^3.3.0",
+    "heroku": "^7.35.0",
     "moment": "^2.24.0",
     "mysql": "^2.17.1",
     "mysql2": "^2.0.0",

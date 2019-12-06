@@ -135,10 +135,11 @@ function initMap() {
 }
 
 $(document).ready(function () {
+    var uploadTimer;
     var loggedin = false;
     var user_Name = "";
     //**Variabel below used for local file upload, wont work with GitHub*/
-    var formData = new FormData();
+    // var formData = new FormData();
     // Display user info
     function userInfo() {
         $.get("/api/user_data", function (data) {}).then(function (data) {
@@ -214,6 +215,11 @@ $(document).ready(function () {
     });
 
     function getSignedRequest(file){
+        $("#loadingSpinner").modal("toggle");
+        uploadTimer = setTimeout(function(){
+            alert("Upload canceled, took too long!");
+            $("#loadingSpinner").modal("toggle");
+            }, 300000);
         var xhr = new XMLHttpRequest();
         xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
         xhr.onreadystatechange = () => {
@@ -236,11 +242,15 @@ $(document).ready(function () {
     xhr.onreadystatechange = () => {
         if(xhr.readyState === 4){
         if(xhr.status === 200){
+            clearTimeout(uploadTimer);
             document.getElementById('ufo-preview').src = url;
-            //document.getElementById('avatar-url').value = url;
+            alert("Upload Complete");
+            $("#loadingSpinner").modal("toggle");
         }
         else{
+            clearTimeout(uploadTimer);
             alert('Could not upload file.');
+            $("#loadingSpinner").modal("toggle");
         }
         }
     };

@@ -1,4 +1,5 @@
 $(document).ready(function () {
+  var uploadTimer;
   // Getting references to our form and input
   var signUpForm = $("form.signup");
   var usernameInput = $("input#signup-username-input");
@@ -17,13 +18,16 @@ $(document).ready(function () {
   });
 
   function getSignedRequest(file) {
+    $("#loadingSpinner").modal("toggle");
+    uploadTimer = setTimeout(function(){
+        alert("Upload canceled, took too long!");
+        $("#loadingSpinner").modal("toggle");
+        }, 300000);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', "/sign-s3?file-name=" + file.name + "&file-type=" + file.type);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          console.log(xhr.responseText);
-          console.log(JSON.parse(xhr.responseText));
           var response = JSON.parse(xhr.responseText);
           uploadFile(file, response.signedRequest, response.url);
         } else {
@@ -40,10 +44,14 @@ $(document).ready(function () {
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
+          clearTimeout(uploadTimer);
           document.getElementById('preview').src = url;
-          //document.getElementById('avatar-url').value = url;
+          alert("Upload Complete");
+          $("#loadingSpinner").modal("toggle");
         } else {
+          clearTimeout(uploadTimer);
           alert('Could not upload file.');
+          $("#loadingSpinner").modal("toggle");
         }
       }
     };
@@ -59,10 +67,12 @@ $(document).ready(function () {
       aboutMe: aboutMeInput.val().trim(),
       profileurl: $("#preview").attr("src")
     };
-
-    if (!userData.userName || !userData.password) {
-      return;
-    }
+    usernameInput.prop("disabled", true);
+    passwordInput.prop("disabled", true);
+    aboutMeInput.prop("disabled", true);
+    $("#profileImg").prop("disabled", true);
+    signUpForm.find("button").prop("disabled", true);
+    
     signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe);
     usernameInput.val("");
     passwordInput.val("");

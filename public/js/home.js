@@ -152,7 +152,6 @@ $(document).ready(function () {
 
     //Function to hide menu options based on logged in or out.
     $.get("/api/user_data", function (data) {
-        // console.log(data);
     }).then(function (data) {
         // If logged out, display login & signup buttons
         if (data.userName == null) {
@@ -274,8 +273,6 @@ $(document).ready(function () {
                 $("form.sightinglog, form.coordinate").trigger("reset");
                 $("#mylat,#mylng").text("");
                 $("#logging_modal").modal("toggle");
-                console.log("Line 223");
-                console.log(logData.image);
                 submitLog(logData);
             };
         });
@@ -301,7 +298,6 @@ $(document).ready(function () {
     
     //**Function for Uploading photos to local folder, does not work on GitHub */
     // function uploadLogPhoto(fileData){
-    //     console.log("Upload Log Photo")
     //     return new Promise(function (reslove, reject) {
     //       $.ajax({
     //         url: "/logImg/upload",
@@ -318,7 +314,6 @@ $(document).ready(function () {
 
     //Submit new log function
     function submitLog(logData) {
-        // console.log("submtting");
         var data = [];
         var rating = {
             likes: 0,
@@ -339,23 +334,9 @@ $(document).ready(function () {
     //Get all logs
     function getAllLogs() {
         $.get("/api/ufo/sightings", function (res) {}).then(function (data) {
-            // console.log(data);
             for (var i = 0; i < data.length; i++) {
                 var logData = data[i];
-                // console.log(logData);
-                var marker = new google.maps.Marker({
-                    position: {
-                        lat: logData.coordinatesLat,
-                        lng: logData.coordinatesLng
-                    },
-                    map: map,
-                    title: 'Sighting'
-                });
-                
-                marker.setMap(map);
-
                 getRating(logData).then(function (success) {
-                    // console.log(logData);
                 });
             }
         });
@@ -366,12 +347,49 @@ $(document).ready(function () {
         var logData = data
         return new Promise(function (reslove, reject) {
             $.get("/api/ufo/sightings/get_rating/" + data.id, function (res) {
-                return reslove(res);
+                var marker = new google.maps.Marker({
+                    position: {
+                        lat: logData.coordinatesLat,
+                        lng: logData.coordinatesLng
+                    },
+                    map: map,
+                    label: ""+logData.id,
+                    title: logData.userName
+                });
+                marker.setMap(map);
+                var content =   '<div class="row no-gutters p-2 bg-dark border rounded">'+
+                                    '<div class="col-lg-4 d-flex align-items-center justify-content-center p-2">'+
+                                        '<img class="card-img" src="'+logData.image+'" alt="UFO Image">'+
+                                        '</div>'+
+                                    '<div class="col-lg-8">'+
+                                        '<div class="card-header border-success border rounded">'+
+                                            '<h6>'+logData.title+'</h5>'+
+                                        '</div>'+
+                                        '<div class="card-body">'+
+                                            '<p>'+logData.description+'</p>'+
+                                        '</div>'+
+                                        '<div class="card-footer" id="ufolog'+logData.id+'">'+
+                                            '<button class="btn rateBtn likebutton" data-logid="'+logData.id+'">'+
+                                                '<i class="far fa-thumbs-up" aria-hidden="true"></i>'+
+                                            '</button><span id="likelog'+logData.id+'">'+res.likes+'</span>'+
+                                            '<button class="btn rateBtn dislikebutton" data-logid="'+logData.id+'"><i class="far fa-thumbs-down" aria-hidden="true"></i>'+
+                                            '</button><span id="dislikelog'+logData.id+'">'+res.dislikes+'</span><p class="float-right"><span>'+moment(logData.createdAt).format("MMM D, YYYY h:mm A")+'</span>-<span class="btn btn-link profilebtn" data-userid="'+logData.UserId+'">'+logData.userName+'</span></p>'+
+                                        '</div>'+
+                                    '</div>'+
+                                    '</div>'+
+                                '</div>';
+                var infowindow = new google.maps.InfoWindow();
+                google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
+                    return function() {
+                       infowindow.setContent(content);
+                       infowindow.open(map,marker);
+                    };
+                })(marker,content,infowindow));
             }).then(function (response) {
                 //inserts response likes/dislikes object into single log data object
                 logData.rating = response;
-                // console.log(logData);
                 createLogCard(logData);
+                return reslove(response);
             });
         });
     }
@@ -391,7 +409,6 @@ $(document).ready(function () {
                 rating: "like"
             }
             updateRating(ratingData).then(function (success) {
-                // console.log(success);  
                 $("#likelog" + logID).text(success.likes);
                 $(button).prop('disabled', false);
             }).catch(function (error) {
@@ -441,8 +458,6 @@ $(document).ready(function () {
 
     //Log Card creation function
     function createLogCard(Data) {
-        // console.log("======Create Card=========")
-        // console.log(Data)
         //Create Card Div
         var cardDiv = $("<div>").addClass("card m-2 logCard");
         //Creating row with no gutters
@@ -488,18 +503,11 @@ $(document).on("click","span.profilebtn",function(event){
     event.preventDefault();
     $("#results-modal-profile").modal("toggle");
     var profileID = $("span.profilebtn").attr("data-UserId")
-    console.log(profileID);
-    var logID = $("button.dislikebutton").attr("data-logid")
-    console.log(logID);
     $.get("/api/ufo/Users/"+profileID, function (data) {
      }).then(function (data) {
-       console.log(data);
        var profileName = data.userName;
        var profileBio = data.aboutMe;
        var profileUrl = data.profileurl;
-        //var img = data[0].profileurl
-        var img = "https://ichef.bbci.co.uk/news/660/media/images/75473000/jpg/_75473457_forbidden-planet.jpg";
-       
        $("#username").text(profileName);
        $("#userinfo").text(profileBio);
         $('<img>').attr({

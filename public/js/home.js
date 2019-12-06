@@ -149,6 +149,28 @@ $(document).ready(function () {
             }
         });
     };
+
+    $.get("/api/user_data", function (data) {
+        // console.log(data);
+    }).then(function (data) {
+        // If logged out, display login & signup buttons
+        if (data.userName == null) {
+            $("#login").css("display", "inherit");
+            $("#signup").css("display", "inherit");
+            $("#signout").css("display", "none");
+            $("#profile").css("display", "none");
+            $("#log_sighting").css("display", "none");
+        }
+        // If logged in, display signout & profile buttons
+        else {
+            $("#login").css("display", "none");
+            $("#signup").css("display", "none");
+            $("#signout").css("display", "inherit");
+            $("#profile").css("display", "inherit");
+            $("#log_sighting").css("display", "inherit");
+        }
+    });
+
     // Signing Up
     $("#signup").on("click", function (event) {
         event.preventDefault();
@@ -488,27 +510,6 @@ $(document).on("click","span.profilebtn",function(event){
     
      });
    });
-
-    $.get("/api/user_data", function (data) {
-        // console.log(data);
-    }).then(function (data) {
-        // If logged out, display login & signup buttons
-        if (data.userName == null) {
-            $("#login").css("display", "inherit");
-            $("#signup").css("display", "inherit");
-            $("#signout").css("display", "none");
-            $("#profile").css("display", "none");
-            $("#log_sighting").css("display", "none");
-        }
-        // If logged in, display signout & profile buttons
-        else {
-            $("#login").css("display", "none");
-            $("#signup").css("display", "none");
-            $("#signout").css("display", "inherit");
-            $("#profile").css("display", "inherit");
-            $("#log_sighting").css("display", "inherit");
-        }
-    });
 
     getAllLogs()
     userInfo();

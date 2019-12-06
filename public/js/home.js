@@ -6,7 +6,7 @@ function initMap() {
             lat: 41.4993,
             lng: -81.6944
         },
-        zoom: 4,
+        zoom: 1,
         styles: [{
                 elementType: 'geometry',
                 stylers: [{

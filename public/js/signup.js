@@ -3,7 +3,7 @@ $(document).ready(function () {
   var signUpForm = $("form.signup");
   var usernameInput = $("input#signup-username-input");
   var passwordInput = $("input#signup-password-input");
-  var aboutMeInput = $("input#signup-aboutMe-input");
+  var aboutMeInput = $("textarea#signup-aboutMe-input");
   //**Code below this is used for uploading to local storage */
   //var formData = new FormData();
 

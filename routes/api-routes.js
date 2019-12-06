@@ -332,7 +332,7 @@ module.exports = function (app) {
 
     var fileName = req.query['file-name'];
     var fileType = req.query['file-type'];
-    var uniqueName = Date.now()+"-"+fileName;
+    var uniqueName = Date.now()+""+fileName;
     var s3Params = {
       Bucket: Bucket_Name,
       Key: uniqueName,

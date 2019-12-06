@@ -6,7 +6,7 @@ function initMap() {
             lat: 41.4993,
             lng: -81.6944
         },
-        zoom: 8,
+        zoom: 4,
         styles: [{
                 elementType: 'geometry',
                 stylers: [{
@@ -150,6 +150,7 @@ $(document).ready(function () {
         });
     };
 
+    //Function to hide menu options based on logged in or out.
     $.get("/api/user_data", function (data) {
         // console.log(data);
     }).then(function (data) {

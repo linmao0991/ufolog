@@ -36,9 +36,6 @@
                 <li class="nav-item">
                     <a class="nav-link" id="home" href="/">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="log_sighting" href="#">Log Sighting</a>
-                </li>
             </ul>
         </div>
     </nav>
@@ -69,70 +66,6 @@
                 </div>
             </div>
         </div>
-
-    <!-- Log Sighting Modal -->
-    <div id="logging_modal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
-                    <h2 class="modal-title"><strong>Log My Sighting</strong></h2>
-                </div>
-                <form class="sightinglog">
-                    <div class="form-group">
-                        <label for="sighting_title">Log Title</label>
-                        <input type="text" class="form-control" id="log_title" placeholder="Title" required="required">
-                    </div>
-                    <div class="form-group">
-                        <label for="sighting_description">Sighting Description</label>
-                        <textarea class="form-control" id="log_description" placeholder="Describe your sighting here!" required="required"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="sighting_image">Upload Image</label>
-                        <br>
-                        <input id="logImg" type="file" accept="image/*" capture="camera" name="photo[]">
-                    </div>
-                    <div>
-                        <p>Latitude: <span id="mylat" required="required"></span> Longitude: <span id="mylng" required="required"></span></p>
-                        <button class="btn btn-light" id="getlocation" type="button">Get Coordinates</button>
-                        <button class="btn btn-light" id="manualLocation" type="button">Manual Coordinates</button>
-                    </div>
-                    <hr>
-                    <button type="submit" class="btn btn-secondary float-right">Submit</button>
-                    <button type="button" class="btn btn-default float-left" data-dismiss="modal">Close</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Manual Coordinate Input -->
-    <div id="coordinate_modal" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-
-            <!-- Modal content-->
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
-                    <h2 class="modal-title"><strong>Manual Coordinate Input</strong></h2>
-                </div>
-                <form class="coordinate">
-                    <div class="form-group">
-                        <label for="sighting_title">Latitude</label>
-                        <input type="float" class="form-control" id="manual_lat" placeholder="Latitude" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sighting_title">Longitude</label>
-                        <input type="float" class="form-control" id="manual_lng" placeholder="Longitude" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary float-right">Submit</button>
-                    <button type="button" class="btn btn-default text-white float-left" data-dismiss="modal">Close</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
 
 <!-- Footer -->
 <footer class="page-footer font-small blue">

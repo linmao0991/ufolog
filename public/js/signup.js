@@ -18,6 +18,7 @@ $(document).ready(function () {
   });
 
   function getSignedRequest(file) {
+    $("#loadingSpinner").find("button.btn").text("Uploading...")
     $("#loadingSpinner").modal("toggle");
     uploadTimer = setTimeout(function(){
         alert("Upload canceled, took too long!");
@@ -61,23 +62,24 @@ $(document).ready(function () {
   // When the signup button is clicked, we validate the email and password are not blank
   signUpForm.on("submit", function (event) {
     event.preventDefault();
+    $(this).find("input, button, textarea").prop("disabled", true);
+    $("#loadingSpinner").find("button.btn").text("Submitting...");
+    $("#loadingSpinner").modal("toggle");
+    uploadTimer = setTimeout(function(){
+      alert("Sign up canceled, took too long!");
+      $("#loadingSpinner").modal("toggle");
+      }, 300000);
     var userData = {
       userName: usernameInput.val().trim(),
       password: passwordInput.val().trim(),
       aboutMe: aboutMeInput.val().trim(),
       profileurl: $("#preview").attr("src")
-    };
-    usernameInput.prop("disabled", true);
-    passwordInput.prop("disabled", true);
-    aboutMeInput.prop("disabled", true);
-    $("#profileImg").prop("disabled", true);
-    signUpForm.find("button").prop("disabled", true);
-    
-    signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe);
+    }
     usernameInput.val("");
     passwordInput.val("");
     aboutMeInput.val("");
     $("#preview").attr("src", "");
+    signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe);
   });
 
   // Does a post to the signup route. If successful, we are redirected to the members page
@@ -101,6 +103,8 @@ $(document).ready(function () {
     $("#alert .msg").text(err.responseJSON.errors[0].message);
     console.log(err)
     $("#alert").fadeIn(500);
+    $(this).find("input, button, textarea").prop("disabled", false);
+    clearTimeout(uploadTimer);
   }
 
   //** Function to save image to local folder, does not work with GitHub */

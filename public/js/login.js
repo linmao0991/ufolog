@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  
+    var uploadTimer;
     // Getting references to our form and input
     var loginForm = $("form.login");
     var usernameInput = $("input#login-username-input");
@@ -8,18 +8,20 @@ $(document).ready(function() {
   // When the form is submitted, we validate there's an email and password entered
   loginForm.on("submit", function(event) {
       event.preventDefault();
+      $(this).find("input, button").prop("disabled",true);
+      $("#loadingSpinner").find("button.btn").text("Logging in...");
+      $("#loadingSpinner").modal("toggle");
+      uploadTimer = setTimeout(function(){
+        alert("Logging in canceled, took too long!");
+        $("#loadingSpinner").modal("toggle");
+        }, 300000);
       var userData = {
         userName: usernameInput.val().trim(),
         password: passwordInput.val().trim()
       };
-  
-      if (!userData.userName || !userData.password) {
-        return;
-      }
-      // If we have an email and password, run the signUpUser function
-      loginUser(userData.userName, userData.password);
       usernameInput.val("");
       passwordInput.val("");
+      loginUser(userData.userName, userData.password);
     });
   
      // loginUser does a post to our "api/login" route and if successful, redirects us the the members page
@@ -38,5 +40,7 @@ $(document).ready(function() {
       $("#alert2 .msg").text("Username or Password is incorrect");
       console.log(err);
       $("#alert2").fadeIn(500);
+      $(this).find("input, button").prop("disabled",false);
+      clearTimeout(uploadTimer);
     }
   });

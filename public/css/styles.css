@@ -54,5 +54,7 @@ i {
     border: 1px solid #28a745;
 }
 
-#loadingSpinner{
+textarea {
+    overflow-y:auto;
+    resize: none;
 }

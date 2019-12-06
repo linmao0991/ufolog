@@ -187,6 +187,7 @@ $(document).ready(function () {
     // Log Sighting Button
     $("#log_sighting").on("click", function (event) {
         event.preventDefault();
+        //$("#logging_modal").modal("toggle");
         $("#logging_modal").modal("toggle");
     });
 
@@ -215,6 +216,7 @@ $(document).ready(function () {
     });
 
     function getSignedRequest(file){
+        $("#loadingSpinner").find("button").append("Uploading...")
         $("#loadingSpinner").modal("toggle");
         uploadTimer = setTimeout(function(){
             alert("Upload canceled, took too long!");
@@ -260,6 +262,14 @@ $(document).ready(function () {
     // Sighting log form submission
     $("form.sightinglog").on("submit", function (event) {
         event.preventDefault();
+        $(this).find("input, button, textarea").prop("disabled", true);
+        $("#loadingSpinner").find("button.btn").text("Submitting Log...")
+        $("#loadingSpinner").modal("toggle");
+        uploadTimer = setTimeout(function(){
+            alert("Log Submission canceled, took too long!");
+            $("#loadingSpinner").modal("toggle");
+            }, 300000);
+        
         var logData = {};
         $.get("/api/user_data", function (err, res) {}).then(function (data) {
             //Creating log data object
@@ -277,6 +287,7 @@ $(document).ready(function () {
                 $("#mylat").parent().addClass("border border-danger")
                 $("#mylng").parent().addClass("border border-danger")
                 alert('Please enter coordinates.');
+                $(this).find("input, button, textarea").prop("disabled", true);
             } else {
                 logData.coordinatesLat = parseFloat($("#mylat").text());
                 logData.coordinatesLng = parseFloat($("#mylng").text());
@@ -332,6 +343,7 @@ $(document).ready(function () {
         $.post("/api/sighting/log", logData, function () {
             alert("Sighting Logged");
         }).then(function (res) {
+            clearTimeout(uploadTimer);
             //sets data to res object
             data = res;
             //insert new rating object into data object

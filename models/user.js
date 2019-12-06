@@ -11,7 +11,6 @@ module.exports = function(sequelize, DataTypes) {
     profileurl: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true,
     },
     email: {
       type: DataTypes.STRING,
@@ -24,7 +23,6 @@ module.exports = function(sequelize, DataTypes) {
     aboutMe: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true,
     },
     // The password cannot be null
     password: {

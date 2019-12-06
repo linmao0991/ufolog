@@ -138,8 +138,8 @@ $(document).ready(function () {
 
     var loggedin = false;
     var user_Name = "";
+    //**Variabel below used for local file upload, wont work with GitHub*/
     var formData = new FormData();
-
     // Display user info
     function userInfo() {
         $.get("/api/user_data", function (data) {}).then(function (data) {
@@ -147,8 +147,6 @@ $(document).ready(function () {
             if (typeof data.userName !== "undefined" || typeof data.userName !== null) {
                 loggedin = true;
                 user_Name = data.userName;
-                // console.log(user_Name);
-                // console.log(loggedin);
             }
         });
     };

@@ -8,7 +8,7 @@ $(document).ready(function () {
   //var formData = new FormData();
 
   // Profile Image on Sign Up
-  $("#profileImg").on("change", function(){
+  $("#profileImg").on("change", function () {
     var files = document.getElementById("profileImg").files;
     var file = files[0];
     getSignedRequest(file);
@@ -16,18 +16,17 @@ $(document).ready(function () {
     //formData.append("photo", file, file.name);
   });
 
-  function getSignedRequest(file){
+  function getSignedRequest(file) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', "/sign-s3?file-name="+file.name+"&file-type="+file.type);
-    xhr.onreadystatechange = function() {
-      if(xhr.readyState === 4){
-        if(xhr.status === 200){
+    xhr.open('GET', "/sign-s3?file-name=" + file.name + "&file-type=" + file.type);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
           console.log(xhr.responseText);
           console.log(JSON.parse(xhr.responseText));
           var response = JSON.parse(xhr.responseText);
           uploadFile(file, response.signedRequest, response.url);
-        }
-        else{
+        } else {
           alert('Could not get signed URL.');
         }
       }
@@ -35,28 +34,26 @@ $(document).ready(function () {
     xhr.send();
   }
 
-  function uploadFile(file, signedRequest, url){
+  function uploadFile(file, signedRequest, url) {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', signedRequest);
     xhr.onreadystatechange = () => {
-      if(xhr.readyState === 4){
-        if(xhr.status === 200){
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
           document.getElementById('preview').src = url;
           //document.getElementById('avatar-url').value = url;
-        }
-        else{
+        } else {
           alert('Could not upload file.');
         }
       }
     };
     xhr.send(file);
   }
-  
 
   // When the signup button is clicked, we validate the email and password are not blank
   signUpForm.on("submit", function (event) {
     event.preventDefault();
-      var userData = {
+    var userData = {
       userName: usernameInput.val().trim(),
       password: passwordInput.val().trim(),
       aboutMe: aboutMeInput.val().trim(),
@@ -66,11 +63,11 @@ $(document).ready(function () {
     if (!userData.userName || !userData.password) {
       return;
     }
-      signUpUser(userData.userName, userData.password,userData.profileurl, userData.aboutMe);
-      usernameInput.val("");
-      passwordInput.val("");
-      aboutMeInput.val("");
-      $("#preview").attr("src","");
+    signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe);
+    usernameInput.val("");
+    passwordInput.val("");
+    aboutMeInput.val("");
+    $("#preview").attr("src", "");
   });
 
   // Does a post to the signup route. If successful, we are redirected to the members page

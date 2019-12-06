@@ -23,7 +23,7 @@ module.exports = function(sequelize, DataTypes) {
       },
       category: {
         type: DataTypes.STRING,
-        defaultValue: "Alien"
+        defaultValue: "UFO"
       },
       image:{
           type: DataTypes.STRING,

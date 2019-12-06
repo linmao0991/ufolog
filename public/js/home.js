@@ -135,7 +135,6 @@ function initMap() {
 }
 
 $(document).ready(function () {
-
     var loggedin = false;
     var user_Name = "";
     //**Variabel below used for local file upload, wont work with GitHub*/
@@ -144,7 +143,7 @@ $(document).ready(function () {
     function userInfo() {
         $.get("/api/user_data", function (data) {}).then(function (data) {
             //Sets user as logged in if true
-            if (typeof data.userName !== "undefined" || typeof data.userName !== null) {
+            if (typeof data.userName !== "undefined" && typeof data.userName !== null) {
                 loggedin = true;
                 user_Name = data.userName;
             }
@@ -426,7 +425,7 @@ $(document).ready(function () {
         //Creating row with no gutters
         var rowDiv = $("<div>").addClass("row no-gutters");
         //Creating Image div
-        var imgDiv = $("<div>").addClass("col-lg-4");
+        var imgDiv = $("<div>").addClass("col-lg-4 d-flex align-items-center justify-content-center p-2");
         var img = $("<img>").addClass("card-img").attr({
             "src": Data.image,
             "alt": "UFO Image"
@@ -435,21 +434,22 @@ $(document).ready(function () {
 
         //Create card content div
         var mainDiv = $("<div>").addClass("col-lg-8");
-        var headerDiv = $("<div>").addClass("card-header border-success border rounded").html("<h5>" + Data.title + "</h5");
-        var bodyDiv = $("<div>").addClass("card-body").html("<p>" + Data.description + "</p>");
-        var divFooter = $("<div>").addClass("card-footer").attr("id", "ufolog" + Data.id);
-        //Like Button
-        var likeButton = $("<button>").addClass("btn rateBtn likebutton").attr("data-logid", Data.id);
-        likeButton.append("<i class='far fa-thumbs-up'></i>");
-        //Dislike Button
-        var dislikeButton = $("<button>").addClass("btn rateBtn dislikebutton").attr("data-logid", Data.id);
-        dislikeButton.append("<i class='far fa-thumbs-down'></i>");
-        //Log Data
-        var footerData = $("<p>").addClass("float-right").html("<span>" + moment(Data.createdAt).format("MMM D, YYYY h:mm A ") + "</span>-<span> " + Data.userName + "</span>")
-        //Append to footer
-        divFooter.append(likeButton, "<span id='likelog" + Data.id + "'>" + Data.rating.likes + "</span>", dislikeButton, "<span id='dislikelog" + Data.id + "'> " + Data.rating.dislikes + "</span>", footerData);
-        //Append all content to mainDiv
-        mainDiv.append(headerDiv, bodyDiv, divFooter);
+            var headerDiv = $("<div>").addClass("card-header border-success border rounded").html("<h5>"+Data.title+"</h5");
+            var bodyDiv = $("<div>").addClass("card-body").html("<p>"+Data.description+"</p>");
+            var divFooter = $("<div>").addClass("card-footer").attr("id","ufolog"+Data.id);
+                //Like Button
+                var likeButton = $("<button>").addClass("btn rateBtn likebutton").attr("data-logid",Data.id);
+                likeButton.append("<i class='far fa-thumbs-up'></i>");
+                //Dislike Button
+                var dislikeButton = $("<button>").addClass("btn rateBtn dislikebutton").attr("data-logid",Data.id);
+                dislikeButton.append("<i class='far fa-thumbs-down'></i>");
+                //Log Data
+                // var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D, YYYY h:mm A ")+"</span>-<span> "+Data.userName+"</span>")
+                var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D, YYYY h:mm A")+"</span>-<span class='btn btn-link profilebtn' data-userId = '"+Data.UserId+"'>"+Data.userName+"</span>")
+            //Append to footer
+            divFooter.append(likeButton, "<span id='likelog"+Data.id+"'>"+Data.rating.likes+"</span>", dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.rating.dislikes+"</span>", footerData);
+            //Append all content to mainDiv
+            mainDiv.append(headerDiv, bodyDiv, divFooter);
         //Append to row with no gutters
         rowDiv.append(imgDiv, mainDiv);
         //Append to card Div
@@ -457,6 +457,37 @@ $(document).ready(function () {
         //Append to html page
         $("#log_display").prepend(cardDiv);
     };
+
+
+$(document).on("click","span.profilebtn",function(event){  
+     // Displays user info when name is clicked on card
+    $("#userphoto").empty();
+    event.preventDefault();
+    $("#results-modal-profile").modal("toggle");
+    var profileID = $("span.profilebtn").attr("data-UserId")
+    console.log(profileID);
+    var logID = $("button.dislikebutton").attr("data-logid")
+    console.log(logID);
+    $.get("/api/ufo/Users/"+profileID, function (data) {
+     }).then(function (data) {
+       console.log(data);
+       var profileName = data.userName;
+       var profileBio = data.aboutMe;
+       var profileUrl = data.profileurl;
+        //var img = data[0].profileurl
+        var img = "https://ichef.bbci.co.uk/news/660/media/images/75473000/jpg/_75473457_forbidden-planet.jpg";
+       
+       $("#username").text(profileName);
+       $("#userinfo").text(profileBio);
+        $('<img>').attr({
+            'src': profileUrl,
+            'alt': profileName+"'s photo",
+            'title': profileName+"'s photo",
+            'width': 250
+        }).addClass("modalImg").appendTo('#userphoto');
+    
+     });
+   });
 
     $.get("/api/user_data", function (data) {
         // console.log(data);

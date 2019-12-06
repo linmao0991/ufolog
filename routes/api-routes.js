@@ -19,6 +19,9 @@ aws.config.region = "us-east-2";
 var Bucket_Name = process.env.S3_BUCKET;
 var User_Key = process.env.AWS_ACCESS_KEY;
 var Secret_Key = process.env.AWS_SECRET_ACCESS_KEY;
+//-------------------------------------------------------------------
+
+
 // Routes
 // =============================================================
 module.exports = function (app) {
@@ -131,6 +134,22 @@ module.exports = function (app) {
     }
   });
 
+  // GET route for getting User info where username equals the name on the card
+  app.get("/api/ufo/Users/:id", function (req, res) {
+    db.User.findOne({
+      where: {
+        id: req.params.id
+      }
+    }).then(function (dbuser) {
+      var profileInfo = {
+        userName: dbuser.userName,
+        profileurl: dbuser.profileurl,
+        aboutMe: dbuser.aboutMe
+      }
+      res.json(profileInfo);
+    });
+  });
+
   app.post("/api/sighting/log/rating/:id", function (req, res) {
     db.log_rating.findOne({
       where: {
@@ -173,135 +192,137 @@ module.exports = function (app) {
     });
   });
 
-  //Upload Profile Image. Local host works, does not work with Github
-  // app.post("/profileImg/upload", function (req, res){
-  //   var photos = [];
-  //   var form = new formidable.IncomingForm();
-  //   // Upload directory for the images
-  //   form.uploadDir = "public/imgs/";
-  //   // Keep file extensions
-  //   form.keepExtensions = true;
-  //   // Sets formibale to only accept single files.
-  //   form.multiples = false;
-  //   // Invoked when a file has finished uploading.
-  //   form.on("file", function ( name, file){
-  //     //Only allow one file
-  //     if (photos.length === 1) {
-  //       fs.unlink(file.path);
-  //       return true;
-  //     }
-  //     // Read a chunk of the file.
-  //     var buffer = null;
-  //     // Get the file type using the buffer read using read-chunk
-  //     var type = null;
-  //     var filename = "";
+  // Code in this section is used for uploading to local folder of the server, will not work with GitHub-------
+        //Upload Profile Image. Local host works, does not work with Github
+        // app.post("/profileImg/upload", function (req, res){
+        //   var photos = [];
+        //   var form = new formidable.IncomingForm();
+        //   // Upload directory for the images
+        //   form.uploadDir = "public/imgs/";
+        //   // Keep file extensions
+        //   form.keepExtensions = true;
+        //   // Sets formibale to only accept single files.
+        //   form.multiples = false;
+        //   // Invoked when a file has finished uploading.
+        //   form.on("file", function ( name, file){
+        //     //Only allow one file
+        //     if (photos.length === 1) {
+        //       fs.unlink(file.path);
+        //       return true;
+        //     }
+        //     // Read a chunk of the file.
+        //     var buffer = null;
+        //     // Get the file type using the buffer read using read-chunk
+        //     var type = null;
+        //     var filename = "";
 
-  //     buffer = readChunk.sync(file.path, 0, 262);
-  //     type = fileType(buffer);
+        //     buffer = readChunk.sync(file.path, 0, 262);
+        //     type = fileType(buffer);
 
-  //     //Checks file extensions
-  //     if (type !== null && (type.ext === 'png' || type.ext === 'jpg' || type.ext === 'jpeg')){
-  //       // Assign new file name
-  //       filename = Date.now() + '-' + file.name;
+        //     //Checks file extensions
+        //     if (type !== null && (type.ext === 'png' || type.ext === 'jpg' || type.ext === 'jpeg')){
+        //       // Assign new file name
+        //       filename = Date.now() + '-' + file.name;
 
-  //       // Move the file with the new file name
-  //       fs.rename(file.path, "public/imgs/profile/" + filename, function(err){
-  //         if (err) throw err;
-  //       } );
+        //       // Move the file with the new file name
+        //       fs.rename(file.path, "public/imgs/profile/" + filename, function(err){
+        //         if (err) throw err;
+        //       } );
 
-  //       photos.push({
-  //         status: true,
-  //         filename: filename,
-  //         type: type.ext,
-  //         publicPath: "../imgs/profile/" + filename
-  //       });
-  //     }else{
-  //       photos.push({
-  //         status: false,
-  //         filename: file.name,
-  //         message: 'Invalid file type'
-  //       });
-  //       fs.unlink(file.path);
-  //     }
-  //   });
+        //       photos.push({
+        //         status: true,
+        //         filename: filename,
+        //         type: type.ext,
+        //         publicPath: "../imgs/profile/" + filename
+        //       });
+        //     }else{
+        //       photos.push({
+        //         status: false,
+        //         filename: file.name,
+        //         message: 'Invalid file type'
+        //       });
+        //       fs.unlink(file.path);
+        //     }
+        //   });
 
-  //   form.on('error', function(err) {
-  //     console.log('Error occurred during processing - ' + err);
-  //   });
+        //   form.on('error', function(err) {
+        //     console.log('Error occurred during processing - ' + err);
+        //   });
 
-  //   // Invoked when all the fields have been processed.
-  //   form.on('end', function() {
-  //     console.log('All the request fields have been processed.');
-  //   });
+        //   // Invoked when all the fields have been processed.
+        //   form.on('end', function() {
+        //     console.log('All the request fields have been processed.');
+        //   });
 
-  //   // Parse the incoming form fields.
-  //   form.parse(req, function (err, fields, files) {
-  //     res.status(200).json(photos);
-  //   });
-  // });
+        //   // Parse the incoming form fields.
+        //   form.parse(req, function (err, fields, files) {
+        //     res.status(200).json(photos);
+        //   });
+        // });
 
-  // //Upload Log Image. Local host works, does not work with Github
-  // app.post("/logImg/upload", function (req, res){
-  //   var photos = [];
-  //   var form = new formidable.IncomingForm();
-  //   // Upload directory for the images
-  //   form.uploadDir = "public/imgs/";
-  //   // Keep file extensions
-  //   form.keepExtensions = true;
-  //   // Sets formibale to only accept single files.
-  //   form.multiples = false;
-  //   // Invoked when a file has finished uploading.
-  //   form.on("file", function ( name, file){
-  //     //Only allow one file
-  //     if (photos.length === 1) {
-  //       fs.unlink(file.path);
-  //       return true;
-  //     }
-  //     // Read a chunk of the file.
-  //     var buffer = null;
-  //     // Get the file type using the buffer read using read-chunk
-  //     var type = null;
-  //     var filename = "";
+        // //Upload Log Image. Local host works, does not work with Github
+        // app.post("/logImg/upload", function (req, res){
+        //   var photos = [];
+        //   var form = new formidable.IncomingForm();
+        //   // Upload directory for the images
+        //   form.uploadDir = "public/imgs/";
+        //   // Keep file extensions
+        //   form.keepExtensions = true;
+        //   // Sets formibale to only accept single files.
+        //   form.multiples = false;
+        //   // Invoked when a file has finished uploading.
+        //   form.on("file", function ( name, file){
+        //     //Only allow one file
+        //     if (photos.length === 1) {
+        //       fs.unlink(file.path);
+        //       return true;
+        //     }
+        //     // Read a chunk of the file.
+        //     var buffer = null;
+        //     // Get the file type using the buffer read using read-chunk
+        //     var type = null;
+        //     var filename = "";
 
-  //     buffer = readChunk.sync(file.path, 0, 262);
-  //     type = fileType(buffer);
+        //     buffer = readChunk.sync(file.path, 0, 262);
+        //     type = fileType(buffer);
 
-  //     //Checks file extensions
-  //     if (type !== null && (type.ext === 'png' || type.ext === 'jpg' || type.ext === 'jpeg')){
-  //       // Assign new file name
-  //       filename = Date.now() + '-' + file.name;
-  //       // Move the file with the new file name
-  //       fs.rename(file.path, "public/imgs/log/" + filename, function(err){
-  //         if (err) throw err;
-  //       } );
+        //     //Checks file extensions
+        //     if (type !== null && (type.ext === 'png' || type.ext === 'jpg' || type.ext === 'jpeg')){
+        //       // Assign new file name
+        //       filename = Date.now() + '-' + file.name;
+        //       // Move the file with the new file name
+        //       fs.rename(file.path, "public/imgs/log/" + filename, function(err){
+        //         if (err) throw err;
+        //       } );
 
-  //       photos.push({
-  //         status: true,
-  //         filename: filename,
-  //         type: type.ext,
-  //         publicPath: "../imgs/log/" + filename
-  //       });
-  //     }else{
-  //       photos.push({
-  //         status: false,
-  //         filename: file.name,
-  //         message: 'Invalid file type'
-  //       });
-  //       fs.unlink(file.path);
-  //     }
-  //   });
-  //   form.on('error', function(err) {
-  //     console.log('Error occurred during processing - ' + err);
-  //   });
-  //   // Invoked when all the fields have been processed.
-  //   form.on('end', function() {
-  //     console.log('All the request fields have been processed.');
-  //   });
-  //   // Parse the incoming form fields.
-  //   form.parse(req, function (err, fields, files) {
-  //     res.status(200).json(photos);
-  //   });
-  // });
+        //       photos.push({
+        //         status: true,
+        //         filename: filename,
+        //         type: type.ext,
+        //         publicPath: "../imgs/log/" + filename
+        //       });
+        //     }else{
+        //       photos.push({
+        //         status: false,
+        //         filename: file.name,
+        //         message: 'Invalid file type'
+        //       });
+        //       fs.unlink(file.path);
+        //     }
+        //   });
+        //   form.on('error', function(err) {
+        //     console.log('Error occurred during processing - ' + err);
+        //   });
+        //   // Invoked when all the fields have been processed.
+        //   form.on('end', function() {
+        //     console.log('All the request fields have been processed.');
+        //   });
+        //   // Parse the incoming form fields.
+        //   form.parse(req, function (err, fields, files) {
+        //     res.status(200).json(photos);
+        //   });
+        // });
+  //-------------------------------------------------------------------------------------------------------
 
   app.get('/sign-s3', function(req, res) {
     var s3 = new aws.S3({

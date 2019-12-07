@@ -7,14 +7,19 @@ $(document).ready(function() {
   
   // When the form is submitted, we validate there's an email and password entered
   loginForm.on("submit", function(event) {
+      var selector = this;
       event.preventDefault();
-      $(this).find("input, button").prop("disabled",true);
-      $("#loadingSpinner").find("button.btn").text("Logging in...");
+      $("#loadingSpinner").find("input, button").prop("disabled",true);
+      $("#loadingSpinner").find("button.btn").contents().filter(function(){
+        return this.nodeType === 3;
+        }).remove();
+      $("#loadingSpinner").find("button.btn").append("Logging in...");
       $("#loadingSpinner").modal("toggle");
       uploadTimer = setTimeout(function(){
-        alert("Logging in canceled, took too long!");
+        $(selector).find("input, button").prop("disabled",false);
         $("#loadingSpinner").modal("toggle");
-        }, 300000);
+        alert("Logging in canceled, took too long!");
+        }, 1000);
       var userData = {
         userName: usernameInput.val().trim(),
         password: passwordInput.val().trim()
@@ -37,10 +42,9 @@ $(document).ready(function() {
         .catch(handleLoginErr);
     }
     function handleLoginErr(err) {
-      $("#alert2 .msg").text("Username or Password is incorrect");
-      console.log(err);
-      $("#alert2").fadeIn(500);
-      $(this).find("input, button").prop("disabled",false);
       clearTimeout(uploadTimer);
+      $("#alert2 .msg").text("Username or Password is incorrect");
+      $("#alert2").fadeIn(500);
+      $("#loadingSpinner").find("input, button").prop("disabled",false);
     }
   });

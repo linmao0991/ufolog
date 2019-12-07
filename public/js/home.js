@@ -216,12 +216,17 @@ $(document).ready(function () {
     });
 
     function getSignedRequest(file){
-        $("#loadingSpinner").find("button").append("Uploading...")
+        var selector = $("#loadingSpinner");
+        $("#loadingSpinner").find("button.btn").contents().filter(function(){
+            return this.nodeType === 3;
+            }).remove();
+        $("#loadingSpinner").find("button.btn").append("Uploading...")
         $("#loadingSpinner").modal("toggle");
         uploadTimer = setTimeout(function(){
             alert("Upload canceled, took too long!");
             $("#loadingSpinner").modal("toggle");
-            }, 300000);
+            $(selector).find("input, button").prop("disabled",false);
+            }, 60000);
         var xhr = new XMLHttpRequest();
         xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
         xhr.onreadystatechange = () => {
@@ -231,6 +236,7 @@ $(document).ready(function () {
                 uploadFile(file, response.signedRequest, response.url);
             }
             else{
+                clearTimeout(uploadTimer);
                 alert('Could not get signed URL.');
             }
             }
@@ -262,14 +268,17 @@ $(document).ready(function () {
     // Sighting log form submission
     $("form.sightinglog").on("submit", function (event) {
         event.preventDefault();
-        $(this).find("input, button, textarea").prop("disabled", true);
-        $("#loadingSpinner").find("button.btn").text("Submitting Log...")
+        $("#loadingSpinner").find("input, button, textarea").prop("disabled", true);
+        $("#loadingSpinner").find("button.btn").contents().filter(function(){
+            return this.nodeType === 3;
+            }).remove();
+        $("#loadingSpinner").find("button.btn").append("Submitting Log...")
         $("#loadingSpinner").modal("toggle");
         uploadTimer = setTimeout(function(){
             alert("Log Submission canceled, took too long!");
             $("#loadingSpinner").modal("toggle");
-            }, 300000);
-        
+            $("#loadingSpinner").find("input, button").prop("disabled",false);
+            }, 60000);
         var logData = {};
         $.get("/api/user_data", function (err, res) {}).then(function (data) {
             //Creating log data object
@@ -284,10 +293,11 @@ $(document).ready(function () {
             logData.category = "UFO";
             logData.image = $("#ufo-preview").attr("src");
             if ($("#mylat").text() === "" || $("#mylng").text() === "") {
+                clearTimeout(uploadTimer);
                 $("#mylat").parent().addClass("border border-danger")
                 $("#mylng").parent().addClass("border border-danger")
                 alert('Please enter coordinates.');
-                $(this).find("input, button, textarea").prop("disabled", true);
+                $("#loadingSpinner").find("input, button, textarea").prop("disabled", false);
             } else {
                 logData.coordinatesLat = parseFloat($("#mylat").text());
                 logData.coordinatesLng = parseFloat($("#mylng").text());
@@ -302,18 +312,31 @@ $(document).ready(function () {
     //Get coordinates button
     //**Add a loading animation while getting coordinates
     $("#getlocation").on("click", function (event) {
+        event.preventDefault();
+        $("#loadingSpinner").find("button.btn").contents().filter(function(){
+            return this.nodeType === 3;
+            }).remove();
+        $("#loadingSpinner").find("button.btn").append("Locating...")
+        $("#loadingSpinner").modal("toggle");
+        uploadTimer = setTimeout(function(){
+            alert("Getting location aborted, took too long!");
+            $("#loadingSpinner").modal("toggle");
+        }, 30000);
         $("#mylat").text("");
         $("#mylng").text("");
-        event.preventDefault();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
                 $("#mylat").text(position.coords.latitude);
                 $("#mylng").text(position.coords.longitude);
                 $("#manual_lat").val(position.coords.latitude);
                 $("#manual_lng").val(position.coords.longitude);
+                clearTimeout(uploadTimer);
+                $("#loadingSpinner").modal("toggle");
             });
         } else {
+            clearTimeout(uploadTimer);
             alert("Geolocation is not supported by this browser.");
+            $("#loadingSpinner").modal("toggle");
         }
     });
     
@@ -518,27 +541,30 @@ $(document).ready(function () {
         $("#log_display").prepend(cardDiv);
     };
 
-
+// Displays user info when name is clicked on card
 $(document).on("click","span.profilebtn",function(event){  
-     // Displays user info when name is clicked on card
-    $("#userphoto").empty();
     event.preventDefault();
+    $("#userphoto").find("img").remove();
+    $("#username").text(""); 
+    $("#userinfo").text("");
     $("#results-modal-profile").modal("toggle");
-    var profileID = $("span.profilebtn").attr("data-UserId")
+    var profileID = $(this).attr("data-UserId");
+    console.log(profileID);
     $.get("/api/ufo/Users/"+profileID, function (data) {
      }).then(function (data) {
        var profileName = data.userName;
        var profileBio = data.aboutMe;
        var profileUrl = data.profileurl;
-       $("#username").text(profileName);
-       $("#userinfo").text(profileBio);
-        $('<img>').attr({
+       var imgEle = $('<img>').attr({
             'src': profileUrl,
             'alt': profileName+"'s photo",
             'title': profileName+"'s photo",
             'width': 250
-        }).addClass("modalImg").appendTo('#userphoto');
-    
+            }).addClass("modalImg")
+
+       $("#username").text(profileName);
+       $("#userinfo").text(profileBio);
+        $('#userphoto').append(imgEle)
      });
    });
 

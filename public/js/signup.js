@@ -18,12 +18,16 @@ $(document).ready(function () {
   });
 
   function getSignedRequest(file) {
-    $("#loadingSpinner").find("button.btn").text("Uploading...")
+    $("#loadingSpinner").find("button.btn").contents().filter(function(){
+      return this.nodeType === 3;
+      }).remove();
+    $("#loadingSpinner").find("button.btn").append("Uploading...")
     $("#loadingSpinner").modal("toggle");
     uploadTimer = setTimeout(function(){
         alert("Upload canceled, took too long!");
         $("#loadingSpinner").modal("toggle");
-        }, 300000);
+        $("#loadingSpinner").find("input, button").prop("disabled",false);
+        }, 60000);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', "/sign-s3?file-name=" + file.name + "&file-type=" + file.type);
     xhr.onreadystatechange = function () {
@@ -32,6 +36,7 @@ $(document).ready(function () {
           var response = JSON.parse(xhr.responseText);
           uploadFile(file, response.signedRequest, response.url);
         } else {
+          clearTimeout(uploadTimer);
           alert('Could not get signed URL.');
         }
       }
@@ -63,12 +68,16 @@ $(document).ready(function () {
   signUpForm.on("submit", function (event) {
     event.preventDefault();
     $(this).find("input, button, textarea").prop("disabled", true);
-    $("#loadingSpinner").find("button.btn").text("Submitting...");
+    $("#loadingSpinner").find("button.btn").contents().filter(function(){
+      return this.nodeType === 3;
+      }).remove();
+    $("#loadingSpinner").find("button.btn").append("Submitting...");
     $("#loadingSpinner").modal("toggle");
     uploadTimer = setTimeout(function(){
       alert("Sign up canceled, took too long!");
       $("#loadingSpinner").modal("toggle");
-      }, 300000);
+      $("#loadingSpinner").find("input, button").prop("disabled",false);
+      }, 60000);
     var userData = {
       userName: usernameInput.val().trim(),
       password: passwordInput.val().trim(),
@@ -85,7 +94,6 @@ $(document).ready(function () {
   // Does a post to the signup route. If successful, we are redirected to the members page
   // Otherwise we log any errors
   function signUpUser(userName, password, profileurl, aboutMe) {
-    console.log(profileurl)
     $.post("/api/signup", {
         userName: userName,
         password: password,
@@ -100,11 +108,10 @@ $(document).ready(function () {
   }
 
   function handleLoginErr(err) {
-    $("#alert .msg").text(err.responseJSON.errors[0].message);
-    console.log(err)
-    $("#alert").fadeIn(500);
-    $(this).find("input, button, textarea").prop("disabled", false);
     clearTimeout(uploadTimer);
+    $("#alert .msg").text(err.responseJSON.errors[0].message);
+    $("#alert").fadeIn(500);
+    $("#loadingSpinner").find("input, button, textarea").prop("disabled", false);
   }
 
   //** Function to save image to local folder, does not work with GitHub */

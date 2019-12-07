@@ -1,5 +1,6 @@
+var uploadTimer;
 $(document).ready(function() {
-    var uploadTimer;
+    //var uploadTimer;
     // Getting references to our form and input
     var loginForm = $("form.login");
     var usernameInput = $("input#login-username-input");
@@ -19,7 +20,7 @@ $(document).ready(function() {
         $(selector).find("input, button").prop("disabled",false);
         $("#loadingSpinner").modal("toggle");
         alert("Logging in canceled, took too long!");
-        }, 1000);
+        }, 30000);
       var userData = {
         userName: usernameInput.val().trim(),
         password: passwordInput.val().trim()
@@ -43,8 +44,10 @@ $(document).ready(function() {
     }
     function handleLoginErr(err) {
       clearTimeout(uploadTimer);
+      alert("Username or Password is incorrect");
+      $("#loadingSpinner").modal("toggle");
+      $("#loadingSpinner").find("input, button").prop("disabled",false);
       $("#alert2 .msg").text("Username or Password is incorrect");
       $("#alert2").fadeIn(500);
-      $("#loadingSpinner").find("input, button").prop("disabled",false);
     }
   });

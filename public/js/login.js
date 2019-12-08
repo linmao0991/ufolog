@@ -8,17 +8,14 @@ $(document).ready(function() {
   
   // When the form is submitted, we validate there's an email and password entered
   loginForm.on("submit", function(event) {
+    event.preventDefault();
+      $("#alert2").removeClass("alert-danger").addClass("alert-info");
+      $("#alert2 .msg").text("Logging in...");
+      $("#alert2").fadeIn(500);
       var selector = this;
-      event.preventDefault();
-      $("#loadingSpinner").find("input, button").prop("disabled",true);
-      $("#loadingSpinner").find("button.btn").contents().filter(function(){
-        return this.nodeType === 3;
-        }).remove();
-      $("#loadingSpinner").find("button.btn").append("Logging in...");
-      $("#loadingSpinner").modal("toggle");
+      $(selector).find("input, button").prop("disabled",true);
       uploadTimer = setTimeout(function(){
         $(selector).find("input, button").prop("disabled",false);
-        $("#loadingSpinner").modal("toggle");
         alert("Logging in canceled, took too long!");
         }, 30000);
       var userData = {
@@ -27,27 +24,30 @@ $(document).ready(function() {
       };
       usernameInput.val("");
       passwordInput.val("");
-      loginUser(userData.userName, userData.password);
+      loginUser(userData.userName, userData.password).then(function(error){
+        $(selector).find("input, button").prop("disabled",false);
+        clearTimeout(uploadTimer);
+        $("#alert2").removeClass("alert-info").addClass("alert-danger");
+        $("#alert2 .msg").text(error);
+      });
     });
   
      // loginUser does a post to our "api/login" route and if successful, redirects us the the members page
+    
     function loginUser(userName, password) {
-      $.post("/api/login", {
-        userName: userName,
-        password: password
-      })
-        .then(function(data) {
-          window.location.replace("/profile");
+      return new Promise(function (reslove, reject){
+        $.post("/api/login", {
+          userName: userName,
+          password: password
         })
-        // If there's an error, log the error
-        .catch(handleLoginErr);
-    }
-    function handleLoginErr(err) {
-      clearTimeout(uploadTimer);
-      alert("Username or Password is incorrect");
-      $("#loadingSpinner").modal("toggle");
-      $("#loadingSpinner").find("input, button").prop("disabled",false);
-      $("#alert2 .msg").text("Username or Password is incorrect");
-      $("#alert2").fadeIn(500);
+          .then(function(data) {
+            window.location.replace("/profile");
+          })
+          // If there's an error, log the error
+          .catch(function(){
+            //handleLoginErr()
+            return reslove("Username or Password is incorrect");
+          });
+      });
     }
   });

@@ -1,3 +1,4 @@
+
 $(document).ready(function () {
   var uploadTimer;
   // Getting references to our form and input
@@ -67,16 +68,14 @@ $(document).ready(function () {
   // When the signup button is clicked, we validate the email and password are not blank
   signUpForm.on("submit", function (event) {
     event.preventDefault();
-    $(this).find("input, button, textarea").prop("disabled", true);
-    $("#loadingSpinner").find("button.btn").contents().filter(function(){
-      return this.nodeType === 3;
-      }).remove();
-    $("#loadingSpinner").find("button.btn").append("Submitting...");
-    $("#loadingSpinner").modal("toggle");
+    $("#alertSignUp").removeClass("alert-danger").addClass("alert-info");
+    $("#alertSignUp .msg").text("Signing up...");
+    $("#alertSignUp").fadeIn(500);
+    var selector = this;
+    $(selector).find("input, button, textarea").prop("disabled", true);
     uploadTimer = setTimeout(function(){
       alert("Sign up canceled, took too long!");
-      $("#loadingSpinner").modal("toggle");
-      $("#loadingSpinner").find("input, button").prop("disabled",false);
+      $(selector).find("input, button").prop("disabled",false);
       }, 60000);
     var userData = {
       userName: usernameInput.val().trim(),
@@ -88,13 +87,16 @@ $(document).ready(function () {
     passwordInput.val("");
     aboutMeInput.val("");
     $("#preview").attr("src", "");
-    signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe);
+    signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe).then(function(msg){
+      $(selector).find("input, button").prop("disabled",false);
+    });
   });
 
   // Does a post to the signup route. If successful, we are redirected to the members page
   // Otherwise we log any errors
   function signUpUser(userName, password, profileurl, aboutMe) {
-    $.post("/api/signup", {
+    return new Promise(function(resolve, reject){
+      $.post("/api/signup", {
         userName: userName,
         password: password,
         profileurl: profileurl,
@@ -104,14 +106,17 @@ $(document).ready(function () {
         window.location.replace("/");
       })
       // If there's an error, handle it by throwing up a bootstrap alert
-      .catch(handleLoginErr);
+      .catch(function(err){
+        handleLoginErr(err)
+        return resolve();
+      });
+    })
   }
 
   function handleLoginErr(err) {
     clearTimeout(uploadTimer);
-    $("#alert .msg").text(err.responseJSON.errors[0].message);
-    $("#alert").fadeIn(500);
-    $("#loadingSpinner").find("input, button, textarea").prop("disabled", false);
+    $("#alertSignUp").removeClass("alert-info").addClass("alert-danger");
+    $("#alertSignUp .msg").text(err.responseJSON.errors[0].message);
   }
 
   //** Function to save image to local folder, does not work with GitHub */

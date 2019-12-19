@@ -34,6 +34,28 @@ module.exports = function (app) {
       });
   });
 
+  //GET route for comments by log id.
+  app.get("/api/ufo/comment/bylog/:id", function (req, res){
+    db.comment.findAll({
+      where: {
+        ufoId: req.params.id
+      }
+    }).then( function(comments){
+      res.json(comments);
+    })
+  });
+
+  //GET route for commments by user id.
+  app.get("/api/ufo/comment/byuser/:id", function(req, res){
+    db.comment.findAll({
+      where: {
+        userId: req.params.id
+      }
+    }).then(function(comment){
+      res.json(comment);
+    })
+  });
+
   // GET route for getting all logs where ID equal parameter
   app.get("/api/ufo/sightings/:id", function (req, res) {
     db.ufo.findAll({

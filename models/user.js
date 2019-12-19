@@ -7,6 +7,9 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        len: [5, 25]
+      }
     },
     profileurl: {
       type: DataTypes.STRING,
@@ -23,11 +26,17 @@ module.exports = function(sequelize, DataTypes) {
     aboutMe: {
       type: DataTypes.STRING,
       allowNull: true,
+      validate: {
+        len: [1, 255]
+      }
     },
     // The password cannot be null
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [8, 35]
+      }
     }
   });
   

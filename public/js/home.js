@@ -136,8 +136,6 @@ function initMap() {
 
 $(document).ready(function () {
     var uploadTimer;
-    var loggedin = false;
-    var user_Name = "";
     //**Variabel below used for local file upload, wont work with GitHub*/
     // var formData = new FormData();
     // Display user info
@@ -200,8 +198,8 @@ $(document).ready(function () {
     // Manual coordinate submission
     $("form.coordinate").on("submit", function (event) {
         event.preventDefault();
-        var mylat = $("#manual_lat").val().trim();
-        var mylng = $("#manual_lng").val().trim();
+        var mylat = stripTags($("#manual_lat").val().trim());
+        var mylng = stripTags($("#manual_lng").val().trim());
         $("#mylat").text(mylat);
         $("#mylng").text(mylng);
         $("#coordinate_modal").modal("toggle");
@@ -216,29 +214,25 @@ $(document).ready(function () {
     });
 
     function getSignedRequest(file){
-        var selector = $("#loadingSpinner");
-        $("#loadingSpinner").find("button.btn").contents().filter(function(){
-            return this.nodeType === 3;
-            }).remove();
-        $("#loadingSpinner").find("button.btn").append("Uploading...")
-        $("#loadingSpinner").modal("toggle");
+        var loadingInfo = ["Uploading...", true, "skip"];
+        toggleLoading(loadingInfo)
         uploadTimer = setTimeout(function(){
-            alert("Upload canceled, took too long!");
-            $("#loadingSpinner").modal("toggle");
-            $(selector).find("input, button").prop("disabled",false);
+            loadingInfo = ["Upload Failed", false, "wait"];
+            toggleLoading(loadingInfo)
             }, 60000);
         var xhr = new XMLHttpRequest();
         xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
         xhr.onreadystatechange = () => {
             if(xhr.readyState === 4){
-            if(xhr.status === 200){
-                var response = JSON.parse(xhr.responseText);
-                uploadFile(file, response.signedRequest, response.url);
-            }
-            else{
-                clearTimeout(uploadTimer);
-                alert('Could not get signed URL.');
-            }
+                if(xhr.status === 200){
+                    var response = JSON.parse(xhr.responseText);
+                    uploadFile(file, response.signedRequest, response.url);
+                }
+                else{
+                    clearTimeout(uploadTimer);
+                    loadingInfo = ["Upload Failed", false, "wait"];
+                    toggleLoading(loadingInfo)
+                }
             }
         };
         xhr.send();
@@ -252,13 +246,13 @@ $(document).ready(function () {
         if(xhr.status === 200){
             clearTimeout(uploadTimer);
             document.getElementById('ufo-preview').src = url;
-            alert("Upload Complete");
-            $("#loadingSpinner").modal("toggle");
+            loadingInfo = ["Upload Complete", false, "wait"];
+            toggleLoading(loadingInfo)
         }
         else{
             clearTimeout(uploadTimer);
-            alert('Could not upload file.');
-            $("#loadingSpinner").modal("toggle");
+            loadingInfo = ["Upload Failed", false, "wait"];
+            toggleLoading(loadingInfo)
         }
         }
     };
@@ -268,16 +262,11 @@ $(document).ready(function () {
     // Sighting log form submission
     $("form.sightinglog").on("submit", function (event) {
         event.preventDefault();
-        $("#loadingSpinner").find("input, button, textarea").prop("disabled", true);
-        $("#loadingSpinner").find("button.btn").contents().filter(function(){
-            return this.nodeType === 3;
-            }).remove();
-        $("#loadingSpinner").find("button.btn").append("Submitting Log...")
-        $("#loadingSpinner").modal("toggle");
+        var loadingInfo = ["Submitting Log...", true, "skip"];
+        toggleLoading(loadingInfo);
         uploadTimer = setTimeout(function(){
-            alert("Log Submission canceled, took too long!");
-            $("#loadingSpinner").modal("toggle");
-            $("#loadingSpinner").find("input, button").prop("disabled",false);
+            loadingInfo = ["Submission Failed", false, "wait"];
+            toggleLoading(loadingInfo);
             }, 60000);
         var logData = {};
         $.get("/api/user_data", function (err, res) {}).then(function (data) {
@@ -288,10 +277,10 @@ $(document).ready(function () {
             };
             logData.userName = data.userName;
             logData.UserId = data.id;
-            logData.title = $("#log_title").val().trim();
-            logData.description = $("#log_description").val();
+            logData.title =  stripTags($("#log_title").val().trim());
+            logData.description = stripTags($("#log_description").val());
             logData.category = "UFO";
-            logData.image = $("#ufo-preview").attr("src");
+            logData.image = stripTags($("#ufo-preview").attr("src"));
             if ($("#mylat").text() === "" || $("#mylng").text() === "") {
                 clearTimeout(uploadTimer);
                 $("#mylat").parent().addClass("border border-danger")
@@ -309,34 +298,39 @@ $(document).ready(function () {
         });
     });
 
+    function stripTags(data){
+        console.log(data);
+        var newData = data.replace(/</g, "&lt;");
+        return newData;
+    }
+
     //Get coordinates button
     //**Add a loading animation while getting coordinates
     $("#getlocation").on("click", function (event) {
         event.preventDefault();
-        $("#loadingSpinner").find("button.btn").contents().filter(function(){
-            return this.nodeType === 3;
-            }).remove();
-        $("#loadingSpinner").find("button.btn").append("Locating...")
-        $("#loadingSpinner").modal("toggle");
+        var loadingInfo = ["Locating...",true,"skip"];
+        toggleLoading(loadingInfo);
         uploadTimer = setTimeout(function(){
-            alert("Getting location aborted, took too long!");
-            $("#loadingSpinner").modal("toggle");
+            loadingInfo =  ["Can't find location!",false,"wait"]
+            toggleLoading(loadingInfo);
         }, 30000);
         $("#mylat").text("");
         $("#mylng").text("");
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
+                clearTimeout(uploadTimer);
                 $("#mylat").text(position.coords.latitude);
                 $("#mylng").text(position.coords.longitude);
                 $("#manual_lat").val(position.coords.latitude);
                 $("#manual_lng").val(position.coords.longitude);
-                clearTimeout(uploadTimer);
-                $("#loadingSpinner").modal("toggle");
+                //$("#loadingSpinner").modal("toggle");
             });
+            loadingInfo =  ["Found You!",false,"wait"]
+            toggleLoading(loadingInfo);
         } else {
             clearTimeout(uploadTimer);
-            alert("Geolocation is not supported by this browser.");
-            $("#loadingSpinner").modal("toggle");
+            loadingInfo =  ["Geolocation is not supported by this browser.",false,"wait"]
+            toggleLoading(loadingInfo);
         }
     });
     
@@ -364,7 +358,8 @@ $(document).ready(function () {
             dislikes: 0
         }
         $.post("/api/sighting/log", logData, function () {
-            alert("Sighting Logged");
+            var loadingInfo = ["Log Sumbitted!", false, "wait"];
+            toggleLoading(loadingInfo);
         }).then(function (res) {
             clearTimeout(uploadTimer);
             //sets data to res object
@@ -441,49 +436,96 @@ $(document).ready(function () {
 
     //Like button function
     $(document).on("click", "button.likebutton", function () {
-        //checks if user is logged in
-        if (!loggedin) {
-            alert("Please log in to rate log");
-        } else {
-            $(this).prop('disabled', true);
-            var button = this;
-            var logID = $(button).attr("data-logid")
-            var ratingData = {
-                userName: user_Name,
-                id: $(button).attr("data-logid"),
-                rating: "like"
+        var rate = "like";
+        var button = this;
+        var checkUserTimer;
+        var msg = ["Verifying User...",true,"skip"];
+        toggleLoading(msg);
+        $.get("/api/user_data", function (data) {}).then(function (data) {
+            //Sets user as logged in if true
+            if (typeof data.userName !== "undefined" && typeof data.userName !== null) {
+                var ratingData = {
+                    userName: data.userName,
+                    id: $(button).attr("data-logid"),
+                    rating: rate
+                }
+                clearTimeout(checkUserTimer);
+                updateRating(ratingData).then(function (success) {
+                    $("#"+ratingData.rating+"log" + ratingData.id).text(success.likes);
+                    loadingInfo = ["Log Rated!", false, "wait"];
+                    toggleLoading(loadingInfo)
+                }).catch(function (error) {
+                    alert(error.code + " : " + error.reason);
+                    $("#loadingSpinner").modal("toggle");
+                });
+            }else{
+                clearTimeout(checkUserTimer);
+                loadingInfo = ["Log in to "+rate+"!", false, "wait"];
+                toggleLoading(loadingInfo)
             }
-            updateRating(ratingData).then(function (success) {
-                $("#likelog" + logID).text(success.likes);
-                $(button).prop('disabled', false);
-            }).catch(function (error) {
-                alert(error.code + " : " + error.reason);
-            });
-        }
+        });
+        checkUserTimer = setTimeout(function(){
+            loadingInfo = ["No Response...", false, "wait"];
+            toggleLoading(loadingInfo)
+        },10000);
+        //checks if user is logged in
     });
 
     //DisLike button function
     $(document).on("click", "button.dislikebutton", function () {
-        //checks if user is logged in
-        if (!loggedin) {
-            alert("Please log in to rate log");
-        } else {
-            $(this).prop('disabled', true);
-            var button = this;
-            var logID = $(button).attr("data-logid")
-            var ratingData = {
-                userName: user_Name,
-                id: $(button).attr("data-logid"),
-                rating: "dislike"
+        var rate = "dislike";
+        var button = this;
+        var checkUserTimer;
+        var msg = ["Verifying User...",true,"skip"];
+        toggleLoading(msg);
+        $.get("/api/user_data", function (data) {}).then(function (data) {
+            //Sets user as logged in if true
+            if (typeof data.userName !== "undefined" && typeof data.userName !== null) {
+                var ratingData = {
+                    userName: data.userName,
+                    id: $(button).attr("data-logid"),
+                    rating: rate
+                }
+                clearTimeout(checkUserTimer);
+                updateRating(ratingData).then(function (success) {
+                    $("#"+ratingData.rating+"log" + ratingData.id).text(success.likes);
+                    loadingInfo = ["Log Rated!", false, "wait"];
+                    toggleLoading(loadingInfo)
+                }).catch(function (error) {
+                    alert(error.code + " : " + error.reason);
+                    $("#loadingSpinner").modal("toggle");
+                });
+            }else{
+                clearTimeout(checkUserTimer);
+                loadingInfo = ["Log in to "+rate+"!", false, "wait"];
+                toggleLoading(loadingInfo)
             }
-            updateRating(ratingData).then(function (success) {
-                $("#dislikelog" + logID).text(success.dislikes);
-                $(button).prop('disabled', false);
-            }).catch(function (error) {
-                alert(error.code + " : " + error.reason);
-            });
-        }
+        });
+        checkUserTimer = setTimeout(function(){
+            loadingInfo = ["No Response...", false, "wait"];
+            toggleLoading(loadingInfo)
+        },10000);
+        //checks if user is logged in
     });
+
+    function toggleLoading(info){
+        $("#loadingSpinner").modal({backdrop: 'static', keyboard: false})
+        $("#loadingSpinner").find("button").prop("disabled", info[1]);
+        $("#loadingSpinner").find("button.btn").contents().filter(function(){
+            return this.nodeType === 3;
+            }).remove();
+        $("#loadingSpinner").find("button.btn").append(info[0])
+        if(info[2] !== "wait"){
+            $("#loadingSpinner").modal("toggle");
+        }else{
+            $("#loadingSpinner").find("button").removeClass("btn-dark").addClass("btn-warning");
+        }
+    }
+
+    $(document).on("click","#loadingSpinner", function(){
+        $("#loadingSpinner").modal("toggle");
+        $("#loadingSpinner").find("button").removeClass("btn-warning").addClass("btn-dark");
+    })
 
     // Promise function to update rating and return ratings value
     function updateRating(data) {
@@ -495,6 +537,7 @@ $(document).ready(function () {
                         return reslove(response)
                     });
                 } else {
+                    console.log("updateRating error");
                     return reject(response);
                 }
             });
@@ -527,7 +570,6 @@ $(document).ready(function () {
                 var dislikeButton = $("<button>").addClass("btn rateBtn dislikebutton").attr("data-logid",Data.id);
                 dislikeButton.append("<i class='far fa-thumbs-down'></i>");
                 //Log Data
-                // var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D, YYYY h:mm A ")+"</span>-<span> "+Data.userName+"</span>")
                 var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D, YYYY h:mm A")+"</span>-<span class='btn btn-link profilebtn' data-userId = '"+Data.UserId+"'>"+Data.userName+"</span>")
             //Append to footer
             divFooter.append(likeButton, "<span id='likelog"+Data.id+"'>"+Data.rating.likes+"</span>", dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.rating.dislikes+"</span>", footerData);

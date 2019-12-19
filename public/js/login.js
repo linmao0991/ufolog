@@ -3,11 +3,11 @@ $(document).ready(function() {
     //var uploadTimer;
     // Getting references to our form and input
     var loginForm = $("form.login");
-    var usernameInput = $("input#login-username-input");
-    var passwordInput = $("input#login-password-input");
   
   // When the form is submitted, we validate there's an email and password entered
   loginForm.on("submit", function(event) {
+    var usernameInput = stripTags($("input#login-username-input"));
+    var passwordInput = $("input#login-password-input");
     event.preventDefault();
       $("#alert2").removeClass("alert-danger").addClass("alert-info");
       $("#alert2 .msg").text("Logging in...");
@@ -32,8 +32,13 @@ $(document).ready(function() {
       });
     });
   
+    function stripTags(data){
+      console.log(data);
+      var newData = data.replace(/</g, "&lt;");
+      return newData;
+    }
+
      // loginUser does a post to our "api/login" route and if successful, redirects us the the members page
-    
     function loginUser(userName, password) {
       return new Promise(function (reslove, reject){
         $.post("/api/login", {

@@ -3,7 +3,7 @@ $(document).ready(function() {
     //var uploadTimer;
     // Getting references to our form and input
     var loginForm = $("form.login");
-    var usernameInput = $("input#login-username-input");
+    var usernameInput = stripTags($("input#login-username-input"));
     var passwordInput = $("input#login-password-input");
   
   // When the form is submitted, we validate there's an email and password entered

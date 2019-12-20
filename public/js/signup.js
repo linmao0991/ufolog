@@ -3,9 +3,9 @@ $(document).ready(function () {
   var uploadTimer;
   // Getting references to our form and input
   var signUpForm = $("form.signup");
-  var usernameInput = $("input#signup-username-input");
+  var usernameInput = stripTags($("input#signup-username-input"));
   var passwordInput = $("input#signup-password-input");
-  var aboutMeInput = $("textarea#signup-aboutMe-input");
+  var aboutMeInput = stripTags($("textarea#signup-aboutMe-input"));
   //**Code below this is used for uploading to local storage */
   //var formData = new FormData();
 
@@ -81,7 +81,7 @@ $(document).ready(function () {
       userName: usernameInput.val().trim(),
       password: passwordInput.val().trim(),
       aboutMe: aboutMeInput.val().trim(),
-      profileurl: $("#preview").attr("src")
+      profileurl: stripTags($("#preview").attr("src"))
     }
     usernameInput.val("");
     passwordInput.val("");
@@ -91,6 +91,12 @@ $(document).ready(function () {
       $(selector).find("input, button").prop("disabled",false);
     });
   });
+
+  function stripTags(data){
+    console.log(data);
+    var newData = data.replace(/</g, "&lt;");
+    return newData;
+  }
 
   // Does a post to the signup route. If successful, we are redirected to the members page
   // Otherwise we log any errors

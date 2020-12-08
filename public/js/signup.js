@@ -3,9 +3,10 @@ $(document).ready(function () {
   var uploadTimer;
   // Getting references to our form and input
   var signUpForm = $("form.signup");
-  var usernameInput = stripTags($("input#signup-username-input"));
+  var usernameInput = $("input#signup-username-input");
   var passwordInput = $("input#signup-password-input");
-  var aboutMeInput = stripTags($("textarea#signup-aboutMe-input"));
+  var aboutMeInput = $("textarea#signup-aboutMe-input");
+  let profileImage;
   //**Code below this is used for uploading to local storage */
   //var formData = new FormData();
 
@@ -13,60 +14,64 @@ $(document).ready(function () {
   $("#profileImg").on("change", function () {
     var files = document.getElementById("profileImg").files;
     var file = files[0];
-    getSignedRequest(file);
+    let reader = new FileReader()
+
+    reader.onload = function(e) {
+      profileImage = file
+      $('#preview').attr('src',e.target.result )
+    }
+
+    reader.readAsDataURL(file);
+    //getSignedRequest(file);
     //**Code below this is used for uploading to local storage */
     //formData.append("photo", file, file.name);
   });
 
   function getSignedRequest(file) {
-    $("#loadingSpinner").find("button.btn").contents().filter(function(){
-      return this.nodeType === 3;
-      }).remove();
-    $("#loadingSpinner").find("button.btn").append("Uploading...")
-    $("#loadingSpinner").modal("toggle");
-    uploadTimer = setTimeout(function(){
-        alert("Upload canceled, took too long!");
-        $("#loadingSpinner").modal("toggle");
-        $("#loadingSpinner").find("input, button").prop("disabled",false);
-        }, 60000);
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', "/sign-s3?file-name=" + file.name + "&file-type=" + file.type);
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          var response = JSON.parse(xhr.responseText);
-          uploadFile(file, response.signedRequest, response.url);
-        } else {
-          clearTimeout(uploadTimer);
-          alert('Could not get signed URL.');
+    return new Promise((resolve, reject) => {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', "/sign-s3?file-name=" + file.name + "&file-type=" + file.type);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            uploadFile(file, response.signedRequest, response.url)
+            .then(result => {
+              console.log(result)
+              resolve(response.url)
+            }).catch( err => {
+              console.log(err)
+              reject(err)
+            })
+          } else {
+            reject('Failed: Could not upload image');
+          }
         }
-      }
-    };
-    xhr.send();
+      };
+      xhr.send();
+    })
   }
 
-  function uploadFile(file, signedRequest, url) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', signedRequest);
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          clearTimeout(uploadTimer);
-          document.getElementById('preview').src = url;
-          alert("Upload Complete");
-          $("#loadingSpinner").modal("toggle");
-        } else {
-          clearTimeout(uploadTimer);
-          alert('Could not upload file.');
-          $("#loadingSpinner").modal("toggle");
+  function uploadFile(file, signedRequest) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', signedRequest);
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            //document.getElementById('preview').src = url;
+            resolve('Upload Complete')
+          } else {
+            reject('Failed: Could not upload image')
+          }
         }
-      }
-    };
-    xhr.send(file);
+      };
+      xhr.send(file);
+    })
   }
 
   // When the signup button is clicked, we validate the email and password are not blank
-  signUpForm.on("submit", function (event) {
+ signUpForm.on("submit", async function (event) {
     event.preventDefault();
     $("#alertSignUp").removeClass("alert-danger").addClass("alert-info");
     $("#alertSignUp .msg").text("Signing up...");
@@ -74,28 +79,27 @@ $(document).ready(function () {
     var selector = this;
     $(selector).find("input, button, textarea").prop("disabled", true);
     uploadTimer = setTimeout(function(){
-      alert("Sign up canceled, took too long!");
       $(selector).find("input, button").prop("disabled",false);
-      }, 60000);
-    var userData = {
-      userName: usernameInput.val().trim(),
-      password: passwordInput.val().trim(),
-      aboutMe: aboutMeInput.val().trim(),
-      profileurl: stripTags($("#preview").attr("src"))
-    }
-    usernameInput.val("");
-    passwordInput.val("");
-    aboutMeInput.val("");
-    $("#preview").attr("src", "");
-    signUpUser(userData.userName, userData.password, userData.profileurl, userData.aboutMe).then(function(msg){
-      $(selector).find("input, button").prop("disabled",false);
-    });
+      alert("Failed: Sign up timed out");
+      }, 10000);
+    await getSignedRequest(profileImage).then( imageUrl => {
+      signUpUser(
+        stripTags(usernameInput), 
+        stripTags(passwordInput), 
+        imageUrl, 
+        stripTags(aboutMeInput),
+      ).catch( err => {
+        alert(err);
+        $(selector).find("input, button, textarea").prop("disabled", true);
+      });
+    })
   });
 
   function stripTags(data){
-    console.log(data);
-    var newData = data.replace(/</g, "&lt;");
-    return newData;
+    console.log(data.val().trim())
+    if(data.val().trim() !== ''){
+      return data.val().trim().replace(/</g, "&lt;");
+    }
   }
 
   // Does a post to the signup route. If successful, we are redirected to the members page
@@ -109,12 +113,17 @@ $(document).ready(function () {
         aboutMe: aboutMe
       })
       .then(function (data) {
+        usernameInput.val("");
+        passwordInput.val("");
+        aboutMeInput.val("");
+        profileImage = null
+        $("#preview").attr("src", "");
         window.location.replace("/");
       })
       // If there's an error, handle it by throwing up a bootstrap alert
       .catch(function(err){
-        handleLoginErr(err)
-        return resolve();
+        handleLoginErr(err.responseJSON.errors[0].message)
+        reject();
       });
     })
   }
@@ -122,7 +131,7 @@ $(document).ready(function () {
   function handleLoginErr(err) {
     clearTimeout(uploadTimer);
     $("#alertSignUp").removeClass("alert-info").addClass("alert-danger");
-    $("#alertSignUp .msg").text(err.responseJSON.errors[0].message);
+    $("#alertSignUp .msg").text(err);
   }
 
   //** Function to save image to local folder, does not work with GitHub */

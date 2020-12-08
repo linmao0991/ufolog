@@ -33,9 +33,10 @@ $(document).ready(function() {
     });
   
     function stripTags(data){
-      console.log(data);
-      var newData = data.replace(/</g, "&lt;");
-      return newData;
+      if(!data){
+        var newData = data.replace(/</g, "&lt;");
+        return newData;
+      }
     }
 
      // loginUser does a post to our "api/login" route and if successful, redirects us the the members page

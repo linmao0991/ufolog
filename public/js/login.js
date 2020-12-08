@@ -3,7 +3,7 @@ $(document).ready(function() {
     //var uploadTimer;
     // Getting references to our form and input
     var loginForm = $("form.login");
-    var usernameInput = stripTags($("input#login-username-input"));
+    var usernameInput = $("input#login-username-input");
     var passwordInput = $("input#login-password-input");
   
   // When the form is submitted, we validate there's an email and password entered
@@ -19,8 +19,8 @@ $(document).ready(function() {
         alert("Logging in canceled, took too long!");
         }, 30000);
       var userData = {
-        userName: usernameInput.val().trim(),
-        password: passwordInput.val().trim()
+        userName: stripTags(usernameInput),
+        password: stripTags(passwordInput)
       };
       usernameInput.val("");
       passwordInput.val("");
@@ -33,8 +33,8 @@ $(document).ready(function() {
     });
   
     function stripTags(data){
-      if(!data){
-        var newData = data.replace(/</g, "&lt;");
+      if(data !== ''){
+        var newData = data.val().trim().replace(/</g, "&lt;");
         return newData;
       }
     }

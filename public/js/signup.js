@@ -37,7 +37,6 @@ $(document).ready(function () {
             var response = JSON.parse(xhr.responseText);
             uploadFile(file, response.signedRequest, response.url)
             .then(result => {
-              console.log(result)
               resolve(response.url)
             }).catch( err => {
               console.log(err)
@@ -96,7 +95,6 @@ $(document).ready(function () {
   });
 
   function stripTags(data){
-    console.log(data.val().trim())
     if(data.val().trim() !== ''){
       return data.val().trim().replace(/</g, "&lt;");
     }

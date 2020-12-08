@@ -374,18 +374,25 @@ $(document).ready(function () {
     //Get all logs
     function getAllLogs() {
         $.get("/api/ufo/sightings", function (res) {}).then(function (data) {
+            let getRatingsArray = []
             for (var i = 0; i < data.length; i++) {
                 var logData = data[i];
-                getRating(logData).then(function (success) {
-                });
+                getRatingsArray.push(getRating(logData))
             }
+            Promise.all(getRatingsArray).then( results => {
+                console.log(results)
+                results.forEach( result => {
+                    console.log(result)
+                    createLogCard(result)
+                })
+            })
         });
     }
 
     //Get likes and dislikes for a single log
     function getRating(data) {
-        var logData = data
         return new Promise(function (reslove, reject) {
+            var logData = data
             $.get("/api/ufo/sightings/get_rating/" + data.id, function (res) {
                 var marker = new google.maps.Marker({
                     position: {
@@ -409,9 +416,7 @@ $(document).ready(function () {
                                             '<p>'+logData.description+'</p>'+
                                         '</div>'+
                                         '<div class="card-footer" id="ufolog'+logData.id+'">'+
-                                            '<button class="btn rateBtn likebutton" data-logid="'+logData.id+'">'+
-                                                '<i class="far fa-thumbs-up" aria-hidden="true"></i>'+
-                                            '</button><span id="likelog'+logData.id+'">'+res.likes+'</span>'+
+                                            '<button class="btn rateBtn likebutton" data-logid="'+logData.id+'"><i class="far fa-thumbs-up" aria-hidden="true"></i></button><span id="likelog'+logData.id+'">'+res.likes+'</span>'+
                                             '<button class="btn rateBtn dislikebutton" data-logid="'+logData.id+'"><i class="far fa-thumbs-down" aria-hidden="true"></i>'+
                                             '</button><span id="dislikelog'+logData.id+'">'+res.dislikes+'</span><p class="float-right"><span>'+moment(logData.createdAt).format("MMM D, YYYY h:mm A")+'</span>-<span class="btn btn-link profilebtn" data-userid="'+logData.UserId+'">'+logData.userName+'</span></p>'+
                                         '</div>'+
@@ -428,8 +433,8 @@ $(document).ready(function () {
             }).then(function (response) {
                 //inserts response likes/dislikes object into single log data object
                 logData.rating = response;
-                createLogCard(logData);
-                return reslove(response);
+                //createLogCard(logData);
+                return reslove(logData);
             });
         });
     }
@@ -560,21 +565,19 @@ $(document).ready(function () {
 
         //Create card content div
         var mainDiv = $("<div>").addClass("col-lg-8");
-            var headerDiv = $("<div>").addClass("card-header border-success border rounded").html("<h5>"+Data.title+"</h5");
-            var bodyDiv = $("<div>").addClass("card-body").html("<p>"+Data.description+"</p>");
-            var divFooter = $("<div>").addClass("card-footer").attr("id","ufolog"+Data.id);
-                //Like Button
-                var likeButton = $("<button>").addClass("btn rateBtn likebutton").attr("data-logid",Data.id);
-                likeButton.append("<i class='far fa-thumbs-up'></i>");
-                //Dislike Button
-                var dislikeButton = $("<button>").addClass("btn rateBtn dislikebutton").attr("data-logid",Data.id);
-                dislikeButton.append("<i class='far fa-thumbs-down'></i>");
-                //Log Data
-                var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D, YYYY h:mm A")+"</span>-<span class='btn btn-link profilebtn' data-userId = '"+Data.UserId+"'>"+Data.userName+"</span>")
-            //Append to footer
-            divFooter.append(likeButton, "<span id='likelog"+Data.id+"'>"+Data.rating.likes+"</span>", dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.rating.dislikes+"</span>", footerData);
-            //Append all content to mainDiv
-            mainDiv.append(headerDiv, bodyDiv, divFooter);
+        var headerDiv = $("<div>").addClass("card-header border-success border rounded").html("<h5>"+Data.title+"</h5");
+        var bodyDiv = $("<div>").addClass("card-body").html("<p>"+Data.description+"</p>");
+        var divFooter = $("<div>").addClass("card-footer").attr("id","ufolog"+Data.id);
+            //Like Button
+        var likeButton = $("<button>").addClass("btn rateBtn likebutton").attr("data-logid",Data.id).append("<i class='far fa-thumbs-up'></i>");
+            //Dislike Button
+        var dislikeButton = $("<button>").addClass("btn rateBtn dislikebutton").attr("data-logid",Data.id).append("<i class='far fa-thumbs-down'></i>");
+            //Log Data
+        var footerData = $("<p>").addClass("float-right").html("<span>"+moment(Data.createdAt).format("MMM D, YYYY h:mm A")+"</span>-<span class='btn btn-link profilebtn' data-userId = '"+Data.UserId+"'>"+Data.userName+"</span>")
+        //Append to footer
+        divFooter.append([likeButton,"<span id='likelog"+Data.id+"'>"+Data.rating.likes+"</span>",'&nbsp;', dislikeButton, "<span id='dislikelog"+Data.id+"'> "+Data.rating.dislikes+"</span>", footerData]);
+        //Append all content to mainDiv
+        mainDiv.append(headerDiv, bodyDiv, divFooter);
         //Append to row with no gutters
         rowDiv.append(imgDiv, mainDiv);
         //Append to card Div

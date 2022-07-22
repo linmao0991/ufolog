@@ -20,7 +20,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "express-session": "^1.17.0",
-    "file-type": "^12.4.0",
+    "file-type": "^16.5.4",
     "formidable": "^1.2.1",
     "google-maps": "^3.3.0",
     "heroku": "^7.35.0",
